@@ -10,6 +10,7 @@
   <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
 </head>
 <body class="min-h-screen bg-stone-50 text-stone-900" hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'>
+  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:rounded focus:bg-white focus:p-2">Skip to the content</a>
   <header class="border-b border-stone-200 bg-white">
     <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
       <a href="/" class="text-lg font-semibold text-emerald-800">{{ school_name }}</a>
@@ -28,7 +29,7 @@
       {% endif %}
     </div>
   </header>
-  <main class="mx-auto max-w-6xl px-4 py-6">
+  <main id="main" class="mx-auto max-w-6xl px-4 py-6">
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% for category, message in messages %}
     <div class="flash flash-{{ category }}" role="status">{{ message }}</div>
