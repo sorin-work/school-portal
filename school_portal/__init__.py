@@ -1,7 +1,7 @@
 from flask import Flask
 
 from .config import Config
-from .extensions import db, login_manager
+from .extensions import csrf, db, login_manager
 
 
 def create_app(overrides: dict | None = None) -> Flask:
@@ -15,8 +15,15 @@ def create_app(overrides: dict | None = None) -> Flask:
 
     db.init_app(app)
     login_manager.init_app(app)
+    login_manager.login_view = "auth.login"
+    login_manager.login_message = "Please sign in to continue."
+    csrf.init_app(app)
 
     from . import models  # noqa: F401  (registers the tables)
+
+    @login_manager.user_loader
+    def load_user(user_id: str):
+        return db.session.get(models.User, int(user_id))
 
     _register_blueprints(app)
     _register_template_helpers(app)
@@ -27,6 +34,9 @@ def _register_blueprints(app: Flask) -> None:
     from .blueprints import health
 
     app.register_blueprint(health.bp)
+    from .blueprints import auth
+
+    app.register_blueprint(auth.bp)
 
 
 def _register_template_helpers(app: Flask) -> None:

@@ -1,0 +1,20 @@
+{% macro field(f, class="", hint=None) %}
+<div class="field {{ class }}">
+  {% if f.type == "BooleanField" %}
+  <label class="flex items-center gap-2">{{ f(class="h-4 w-4") }} <span>{{ f.label.text }}</span></label>
+  {% else %}
+  {{ f.label(class="label") }}
+  {% if f.type in ("SelectField", "SelectMultipleField", "QuerySelectField") %}
+  {{ f(class="input") }}
+  {% elif f.type == "TextAreaField" %}
+  {{ f(class="input", rows=4) }}
+  {% else %}
+  {{ f(class="input") }}
+  {% endif %}
+  {% endif %}
+  {% if hint %}<p class="hint">{{ hint }}</p>{% endif %}
+  {% for error in f.errors %}<p class="error">{{ error }}</p>{% endfor %}
+</div>
+{% endmacro %}
+
+{% macro badge(text, colour="slate") %}<span class="badge badge-{{ colour }}">{{ text }}</span>{% endmacro %}

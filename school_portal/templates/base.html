@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="htmx-config" content='{"includeIndicatorStyles": false}'>
+  <title>{% block title %}{{ school_name }}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='dist/app.css') }}">
+  <script src="{{ url_for('static', filename='js/htmx.min.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</head>
+<body class="min-h-screen bg-stone-50 text-stone-900" hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'>
+  <header class="border-b border-stone-200 bg-white">
+    <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
+      <a href="/" class="text-lg font-semibold text-emerald-800">{{ school_name }}</a>
+      {% if current_user.is_authenticated %}
+      <nav class="flex flex-1 flex-wrap items-center gap-x-4 gap-y-1 text-sm" aria-label="Main">
+        {% if current_user.is_admin %}
+        {% endif %}
+      </nav>
+      <div class="flex items-center gap-3 text-sm">
+        <span class="text-stone-600">{{ current_user.first_name }}</span>
+        <form method="post" action="{{ url_for('auth.logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="nav-link" type="submit">Sign out</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+  </header>
+  <main class="mx-auto max-w-6xl px-4 py-6">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+    <div class="flash flash-{{ category }}" role="status">{{ message }}</div>
+    {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
