@@ -1,0 +1,12 @@
+{
+  "name": "school-portal-css",
+  "private": true,
+  "description": "Builds the Tailwind stylesheet. The app itself is Python.",
+  "scripts": {
+    "css": "tailwindcss -i school_portal/static/css/input.css -o school_portal/static/dist/app.css --minify",
+    "css:watch": "tailwindcss -i school_portal/static/css/input.css -o school_portal/static/dist/app.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "3.4.17"
+  }
+}
