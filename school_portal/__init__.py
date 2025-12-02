@@ -37,6 +37,9 @@ def _register_blueprints(app: Flask) -> None:
     from .blueprints import auth
 
     app.register_blueprint(auth.bp)
+    from .blueprints import dashboard
+
+    app.register_blueprint(dashboard.bp)
 
 
 def _register_template_helpers(app: Flask) -> None:

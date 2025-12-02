@@ -32,7 +32,7 @@ def client_ip() -> str:
 @bp.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
-        return redirect("/")
+        return redirect(url_for("dashboard.home"))
     form = LoginForm()
     if form.validate_on_submit():
         email = normalise_email(form.email.data)
