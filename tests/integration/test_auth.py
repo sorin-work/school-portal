@@ -43,6 +43,14 @@ def test_pages_need_a_sign_in(client, app):
     assert "/login" in response.headers["Location"]
 
 
+def test_next_only_follows_local_paths(client, app):
+    user = make_user(Role.STAFF)
+    response = client.post(
+        "/login?next=//evil.example/", data={"email": user.email, "password": PASSWORD}
+    )
+    assert response.headers["Location"] == "/"
+
+
 def test_forms_need_a_csrf_token(app):
     app.config["WTF_CSRF_ENABLED"] = True
     user = make_user(Role.STAFF)

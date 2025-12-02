@@ -43,7 +43,10 @@ def login():
         user.last_login_at = timeutil.now()
         db.session.commit()
         login_user(user)
-        target = request.args.get("next") or url_for("dashboard.home")
+        target = request.args.get("next", "")
+        # Only follow local paths, never another site.
+        if not target.startswith("/") or target.startswith("//"):
+            target = url_for("dashboard.home")
         return redirect(target)
     return render_template("auth/login.html", form=form, demo=_demo())
 
