@@ -27,6 +27,9 @@ def create_app(overrides: dict | None = None) -> Flask:
 
     _register_blueprints(app)
     _register_template_helpers(app)
+    from .cli import register_cli
+
+    register_cli(app)
     return app
 
 
