@@ -1,7 +1,7 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from flask_wtf import FlaskForm
-from sqlalchemy import select
+from sqlalchemy import func, select
 from wtforms import EmailField, PasswordField
 from wtforms.validators import DataRequired, Email
 
@@ -22,7 +22,7 @@ def normalise_email(value: str) -> str:
 
 
 def find_user(email: str) -> User | None:
-    return db.session.scalar(select(User).where(User.email == email.strip()))
+    return db.session.scalar(select(User).where(func.lower(User.email) == normalise_email(email)))
 
 
 def client_ip() -> str:

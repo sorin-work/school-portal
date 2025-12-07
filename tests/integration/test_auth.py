@@ -51,6 +51,13 @@ def test_next_only_follows_local_paths(client, app):
     assert response.headers["Location"] == "/"
 
 
+def test_email_is_not_case_sensitive(client, app):
+    user = make_user(Role.PARENT, email="sam@example.com")
+    response = client.post("/login", data={"email": "Sam@Example.COM", "password": PASSWORD})
+    assert response.status_code == 302
+    assert user.last_login_at is not None
+
+
 def test_forms_need_a_csrf_token(app):
     app.config["WTF_CSRF_ENABLED"] = True
     user = make_user(Role.STAFF)
