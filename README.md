@@ -1,0 +1,60 @@
+# school-portal
+
+A portal for a nursery or a primary school. Staff record the day as it
+happens (meals, naps, nappies, moods, activities, learning observations with
+photos, incidents and accidents, the register) from a tablet in the room, and
+parents and carers see their own children's diary, and nothing else.
+
+It is a Flask app with server-rendered pages, htmx for the quick logging and
+PostgreSQL for everything, including the small job queue the worker runs.
+
+
+## Quick start
+
+With Docker:
+
+```sh
+docker compose up --build
+```
+
+Then open http://127.0.0.1:4433. Mail sent by the app (invitations,
+password resets, daily summaries) lands in Mailpit at http://127.0.0.1:8033.
+
+The compose project is called `school-portal` and uses these host ports, all
+bound to 127.0.0.1:
+
+| Service | Port |
+| ------- | ---- |
+| app     | 4433 |
+| db      | 5463 |
+| mailpit | 8033 |
+
+
+
+## Development
+
+You need Python 3.13, Node 22 (only to build the stylesheet) and a
+PostgreSQL 17. The easiest database is the one from compose:
+
+```sh
+docker compose up -d db
+python3.13 -m venv .venv
+. .venv/bin/activate
+pip install -e ".[dev]"
+npm ci && npm run css        # or npm run css:watch while editing templates
+alembic upgrade head
+flask --app school_portal seed-demo      # optional
+flask --app school_portal run --port 4433 --debug
+```
+
+
+An administrator for a fresh database: `flask --app school_portal create-admin`.
+
+A new migration: change the models, then
+`alembic revision --autogenerate -m "what changed"` and read what it wrote.
+
+
+
+## Licence
+
+MIT, see [LICENSE](LICENSE).
