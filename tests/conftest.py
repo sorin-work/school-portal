@@ -14,7 +14,7 @@ from sqlalchemy import create_engine, text
 
 from school_portal import create_app
 from school_portal.extensions import db
-from school_portal.models import Role, User
+from school_portal.models import Role, Room, RoomStaff, User
 
 TEST_DATABASE_URL = os.environ.get(
     "TEST_DATABASE_URL", "postgresql+psycopg://school:school@127.0.0.1:5463/school_test"
@@ -90,3 +90,13 @@ def make_user(role: str = Role.PARENT, email: str | None = None, name: str | Non
 
 def login(client, user: User, password: str = PASSWORD):
     return client.post("/login", data={"email": user.email, "password": password})
+
+
+def make_room(name: str = "Saplings", kind: str = "nursery", staff=(), leads=()) -> Room:
+    room = Room(name=name, kind=kind)
+    db.session.add(room)
+    db.session.flush()
+    for member in staff:
+        db.session.add(RoomStaff(room_id=room.id, user_id=member.id, is_lead=member in leads))
+    db.session.commit()
+    return room

@@ -44,6 +44,9 @@ def _register_blueprints(app: Flask) -> None:
     from .blueprints import dashboard
 
     app.register_blueprint(dashboard.bp)
+    from .blueprints import admin_rooms
+
+    app.register_blueprint(admin_rooms.bp)
 
 
 def _register_error_pages(app: Flask) -> None:

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Rooms · {{ school_name }}{% endblock %}
+{% block content %}
+<div class="mb-4 flex items-center justify-between">
+  <h1 class="page-title mb-0">Rooms and classes</h1>
+  <a class="btn btn-primary" href="{{ url_for('admin_rooms.create') }}">New room</a>
+</div>
+<div class="card overflow-x-auto">
+  <table class="table">
+    <thead><tr><th>Name</th><th>Kind</th><th>Ages</th><th>Places</th><th>Leads</th><th>Staff</th></tr></thead>
+    <tbody>
+      {% for room in rooms %}
+      <tr>
+        <td><a class="link" href="{{ url_for('admin_rooms.edit', room_id=room.id) }}">{{ room.name }}</a></td>
+        <td>{{ "Nursery" if room.is_nursery else "Class" }}</td>
+        <td>{{ room.age_range or "" }}</td>
+        <td>{{ room.capacity or "" }}</td>
+        <td>{{ room.leads|map(attribute="name")|join(", ") }}</td>
+        <td>{{ room.staff|length }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="text-stone-600">No rooms yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
