@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "partials/forms.html" import field %}
+{% block title %}{{ child.display_name if child else "Add a child" }} · {{ school_name }}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+  <h1 class="page-title mb-0">{{ child.display_name if child else "Add a child" }}</h1>
+  {% if child %}
+  <div class="flex flex-wrap gap-2">
+  </div>
+  {% endif %}
+</div>
+<form method="post" class="card grid gap-4 sm:grid-cols-2" novalidate>
+  {{ form.hidden_tag() }}
+  {{ field(form.first_name) }}
+  {{ field(form.last_name) }}
+  {{ field(form.preferred_name) }}
+  {{ field(form.date_of_birth) }}
+  {{ field(form.room_id) }}
+  {{ field(form.key_person_id) }}
+  {{ field(form.start_date) }}
+  {{ field(form.dietary_needs, class="sm:col-span-2") }}
+  {{ field(form.allergies, class="sm:col-span-2", hint="Shown on the child's tile in the room view.") }}
+  {{ field(form.medical_notes, class="sm:col-span-2", hint="Staff only, unless the box below is ticked.") }}
+  {{ field(form.share_medical_with_parents, class="sm:col-span-2") }}
+  <div class="sm:col-span-2"><button class="btn btn-primary" type="submit">Save</button></div>
+</form>
+{% endblock %}

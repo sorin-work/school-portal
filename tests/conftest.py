@@ -6,6 +6,7 @@ too, and every table is emptied after each test.
 """
 
 import os
+from datetime import date
 
 import pytest
 from alembic import command
@@ -14,7 +15,7 @@ from sqlalchemy import create_engine, text
 
 from school_portal import create_app
 from school_portal.extensions import db
-from school_portal.models import Role, Room, RoomStaff, User
+from school_portal.models import Child, Role, Room, RoomStaff, User
 
 TEST_DATABASE_URL = os.environ.get(
     "TEST_DATABASE_URL", "postgresql+psycopg://school:school@127.0.0.1:5463/school_test"
@@ -100,3 +101,16 @@ def make_room(name: str = "Saplings", kind: str = "nursery", staff=(), leads=())
         db.session.add(RoomStaff(room_id=room.id, user_id=member.id, is_lead=member in leads))
     db.session.commit()
     return room
+
+
+def make_child(room=None, first_name: str = "Ava", **fields) -> Child:
+    child = Child(
+        first_name=first_name,
+        last_name=fields.pop("last_name", "Tester"),
+        date_of_birth=fields.pop("date_of_birth", date(2023, 3, 14)),
+        room_id=room.id if room is not None else None,
+        **fields,
+    )
+    db.session.add(child)
+    db.session.commit()
+    return child
