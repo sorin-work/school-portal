@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "partials/forms.html" import field %}
+{% block title %}{{ user.name if user else "New account" }} · {{ school_name }}{% endblock %}
+{% block content %}
+<h1 class="page-title">{{ user.name if user else "New account" }}</h1>
+<form method="post" class="card grid max-w-2xl gap-4 sm:grid-cols-2" novalidate>
+  {{ form.hidden_tag() }}
+  {{ field(form.name) }}
+  {{ field(form.email) }}
+  {{ field(form.role) }}
+  {{ field(form.phone) }}
+  {{ field(form.password, hint="Leave empty to keep the current password.") }}
+  {{ field(form.active, class="sm:col-span-2") }}
+  <div class="sm:col-span-2"><button class="btn btn-primary" type="submit">Save</button></div>
+</form>
+{% if user %}
+<div class="mt-4 flex flex-wrap gap-2">
+</div>
+{% if links %}
+<section class="card mt-6 max-w-2xl">
+  <h2 class="section-title">Children</h2>
+  <ul class="text-sm">
+    {% for link in links %}
+    <li><a class="link" href="{{ url_for('admin_children.edit', child_id=link.child_id) }}#guardians">{{ link.child.display_name }}</a>, {{ link.relationship_label }}, {{ link.access.replace("_", " ") }}</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endif %}
+{% endblock %}

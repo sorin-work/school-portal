@@ -50,6 +50,9 @@ def _register_blueprints(app: Flask) -> None:
     from .blueprints import admin_children
 
     app.register_blueprint(admin_children.bp)
+    from .blueprints import admin_users
+
+    app.register_blueprint(admin_users.bp)
 
 
 def _register_error_pages(app: Flask) -> None:

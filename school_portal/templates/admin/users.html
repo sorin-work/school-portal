@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Users · {{ school_name }}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+  <h1 class="page-title mb-0">Users</h1>
+  <a class="btn btn-primary" href="{{ url_for('admin_users.create') }}">New account</a>
+</div>
+<div class="card overflow-x-auto">
+  <table class="table">
+    <thead><tr><th>Name</th><th>Email</th><th>Role</th><th></th></tr></thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+        <td><a class="link" href="{{ url_for('admin_users.edit', user_id=user.id) }}">{{ user.name }}</a></td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.role|title }}</td>
+        <td>{% if not user.active %}<span class="badge badge-red">Disabled</span>{% elif not user.password_hash %}<span class="badge badge-amber">Invited</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
