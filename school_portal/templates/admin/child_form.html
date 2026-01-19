@@ -24,4 +24,38 @@
   {{ field(form.share_medical_with_parents, class="sm:col-span-2") }}
   <div class="sm:col-span-2"><button class="btn btn-primary" type="submit">Save</button></div>
 </form>
+{% if child %}
+<section id="guardians" class="card mt-6">
+  <h2 class="section-title">Parents and carers</h2>
+  <table class="table mb-4">
+    <thead><tr><th>Name</th><th>Relationship</th><th>Access</th><th></th></tr></thead>
+    <tbody>
+      {% for link in child.guardians %}
+      <tr>
+        <td>{{ link.user.name }}<br><span class="text-xs text-stone-500">{{ link.user.email }}</span></td>
+        <td>{{ link.relationship_label }}</td>
+        <td>
+          {% if link.access == "full" %}<span class="badge badge-emerald">Full</span>{% elif link.access == "read_only" %}<span class="badge badge-amber">Timeline only</span>{% else %}<span class="badge badge-red">No access</span>{% endif %}
+        </td>
+        <td class="whitespace-nowrap">
+          <form method="post" action="{{ url_for('admin_children.remove_guardian', child_id=child.id, guardian_id=link.id) }}" class="inline" data-confirm="Remove {{ link.user.name }} from {{ child.display_name }}?">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="link text-sm text-red-700" type="submit">Remove</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="text-stone-600">Nobody linked yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <form method="post" action="{{ url_for('admin_children.add_guardian', child_id=child.id) }}" class="grid gap-3 sm:grid-cols-2" novalidate>
+    {{ guardian_form.hidden_tag() }}
+    {{ field(guardian_form.email) }}
+    {{ field(guardian_form.relationship) }}
+    {{ field(guardian_form.access) }}
+    <div class="sm:col-span-2"><button class="btn btn-secondary" type="submit">Link a parent or carer</button></div>
+  </form>
+</section>
+{% endif %}
 {% endblock %}

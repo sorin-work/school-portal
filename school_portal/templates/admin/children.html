@@ -14,6 +14,7 @@
     <thead>
       <tr>
         <th>Name</th><th>Born</th><th>Room</th><th>Key person</th><th>Allergies</th>
+        <th>Guardians</th>
       </tr>
     </thead>
     <tbody>
@@ -24,6 +25,7 @@
         <td>{{ child.room.name if child.room else "" }}</td>
         <td>{{ child.key_person.name if child.key_person else "" }}</td>
         <td>{% if child.has_allergies %}<span class="badge badge-red">Yes</span>{% endif %}</td>
+        <td>{{ child.guardians|length }}</td>
       </tr>
       {% else %}
       <tr><td colspan="6" class="text-stone-600">No children match.</td></tr>

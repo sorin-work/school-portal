@@ -1,12 +1,12 @@
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_wtf import FlaskForm
 from sqlalchemy import func, or_, select
-from wtforms import BooleanField, DateField, SelectField, StringField, TextAreaField
-from wtforms.validators import DataRequired, Length, Optional
+from wtforms import BooleanField, DateField, EmailField, SelectField, StringField, TextAreaField
+from wtforms.validators import DataRequired, Email, Length, Optional
 
 from ..decorators import admin_required
 from ..extensions import db
-from ..models import Child, Role, Room, User
+from ..models import ACCESS_CHOICES, Child, Guardian, Role, Room, User
 
 bp = Blueprint("admin_children", __name__, url_prefix="/admin/children")
 
@@ -23,6 +23,12 @@ class ChildForm(FlaskForm):
     allergies = TextAreaField("Allergies", validators=[Optional(), Length(max=2000)])
     medical_notes = TextAreaField("Medical notes", validators=[Optional(), Length(max=4000)])
     share_medical_with_parents = BooleanField("Show the medical notes to the family")
+
+
+class GuardianForm(FlaskForm):
+    email = EmailField("Email", validators=[DataRequired(), Email()])
+    relationship = StringField("Relationship", default="Parent", validators=[Length(max=40)])
+    access = SelectField("Access", choices=ACCESS_CHOICES, default="full")
 
 
 @bp.get("/")
@@ -123,4 +129,56 @@ def edit(child_id: int):
         "admin/child_form.html",
         form=form,
         child=child,
+        guardian_form=GuardianForm(prefix="g"),
     )
+
+
+@bp.post("/<int:child_id>/guardians")
+@admin_required
+def add_guardian(child_id: int):
+    child = db.get_or_404(Child, child_id)
+    form = GuardianForm(prefix="g")
+    if not form.validate_on_submit():
+        flash("Check the guardian's details: " + _first_error(form), "error")
+        return redirect(url_for(".edit", child_id=child.id) + "#guardians")
+    email = form.email.data.strip().lower()
+    user = db.session.scalar(select(User).where(func.lower(User.email) == email))
+    if user is None:
+        flash("There is no account with that address. Add it under Users first.", "error")
+        return redirect(url_for(".edit", child_id=child.id) + "#guardians")
+    elif user.role != Role.PARENT:
+        flash("That address belongs to a staff account. Use a separate parent account.", "error")
+        return redirect(url_for(".edit", child_id=child.id) + "#guardians")
+    if any(g.user_id == user.id for g in child.guardians):
+        flash(f"{user.name} is already linked to {child.display_name}.", "error")
+        return redirect(url_for(".edit", child_id=child.id) + "#guardians")
+    link = Guardian(
+        child=child,
+        user_id=user.id,
+        relationship_label=form.relationship.data.strip() or "Parent",
+        access=form.access.data,
+    )
+    db.session.add(link)
+    db.session.flush()
+    db.session.commit()
+    flash(f"{user.name} linked to {child.display_name}.", "success")
+    return redirect(url_for(".edit", child_id=child.id) + "#guardians")
+
+
+def _first_error(form) -> str:
+    for errors in form.errors.values():
+        if errors:
+            return errors[0]
+    return "invalid"
+
+
+@bp.post("/<int:child_id>/guardians/<int:guardian_id>/remove")
+@admin_required
+def remove_guardian(child_id: int, guardian_id: int):
+    link = db.session.get(Guardian, guardian_id)
+    if link is None or link.child_id != child_id:
+        abort(404)
+    db.session.delete(link)
+    db.session.commit()
+    flash("Guardian removed from this child.", "success")
+    return redirect(url_for(".edit", child_id=child_id) + "#guardians")

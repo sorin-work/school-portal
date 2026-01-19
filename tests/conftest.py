@@ -15,7 +15,7 @@ from sqlalchemy import create_engine, text
 
 from school_portal import create_app
 from school_portal.extensions import db
-from school_portal.models import Child, Role, Room, RoomStaff, User
+from school_portal.models import Child, Guardian, Role, Room, RoomStaff, User
 
 TEST_DATABASE_URL = os.environ.get(
     "TEST_DATABASE_URL", "postgresql+psycopg://school:school@127.0.0.1:5463/school_test"
@@ -114,3 +114,10 @@ def make_child(room=None, first_name: str = "Ava", **fields) -> Child:
     db.session.add(child)
     db.session.commit()
     return child
+
+
+def link(parent: User, child: Child, access: str = "full") -> Guardian:
+    guardian = Guardian(child_id=child.id, user_id=parent.id, access=access)
+    db.session.add(guardian)
+    db.session.commit()
+    return guardian

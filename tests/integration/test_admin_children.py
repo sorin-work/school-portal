@@ -1,7 +1,7 @@
 from school_portal.extensions import db
 from school_portal.models import Child, Role
 
-from ..conftest import login, make_room, make_user
+from ..conftest import login, make_child, make_room, make_user
 
 
 def test_add_a_child(client, app):
@@ -49,3 +49,28 @@ def test_children_list_and_search(client, app):
 def test_staff_cannot_open_the_admin_pages(client, app):
     login(client, make_user(Role.STAFF))
     assert client.get("/admin/children/").status_code == 403
+
+
+def test_link_an_existing_parent(client, app):
+    admin = make_user(Role.ADMIN)
+    parent = make_user(Role.PARENT, email="sam@example.com")
+    child = make_child()
+    login(client, admin)
+    response = client.post(
+        f"/admin/children/{child.id}/guardians",
+        data={"g-email": "SAM@example.com", "g-relationship": "Mother", "g-access": "full"},
+    )
+    assert response.status_code == 302
+    assert [(g.user_id, g.relationship_label) for g in child.guardians] == [(parent.id, "Mother")]
+
+
+def test_staff_accounts_cannot_be_guardians(client, app):
+    admin = make_user(Role.ADMIN)
+    staff = make_user(Role.STAFF)
+    child = make_child()
+    login(client, admin)
+    client.post(
+        f"/admin/children/{child.id}/guardians",
+        data={"g-email": staff.email, "g-relationship": "Parent", "g-access": "full"},
+    )
+    assert child.guardians == []
