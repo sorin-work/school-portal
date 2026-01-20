@@ -5,6 +5,10 @@
   <h1 class="page-title mb-0">Users</h1>
   <a class="btn btn-primary" href="{{ url_for('admin_users.create') }}">New account</a>
 </div>
+<nav class="mb-4 flex flex-wrap gap-3 text-sm">
+  <a class="link" href="{{ url_for('admin_users.index') }}">Everyone</a>
+  {% for value, label in roles %}<a class="link" href="{{ url_for('admin_users.index', role=value) }}">{{ label }}</a>{% endfor %}
+</nav>
 <div class="card overflow-x-auto">
   <table class="table">
     <thead><tr><th>Name</th><th>Email</th><th>Role</th><th></th></tr></thead>
