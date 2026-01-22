@@ -121,3 +121,34 @@ def link(parent: User, child: Child, access: str = "full") -> Guardian:
     db.session.add(guardian)
     db.session.commit()
     return guardian
+
+
+@pytest.fixture
+def school(app):
+    """Two rooms, a member of staff in each, and two families."""
+    from types import SimpleNamespace
+
+    admin = make_user(Role.ADMIN, email="admin@example.com", name="Ada Admin")
+    amy = make_user(Role.STAFF, email="amy@example.com", name="Amy Staff")
+    ben = make_user(Role.STAFF, email="ben@example.com", name="Ben Staff")
+    saplings = make_room("Saplings", staff=[amy], leads=[amy])
+    oaks = make_room("Oaks", staff=[ben])
+    ava = make_child(saplings, "Ava", last_name="Reid")
+    leon = make_child(saplings, "Leon", last_name="Kowalczyk")
+    kit = make_child(oaks, "Kit", last_name="Aldridge")
+    sam = make_user(Role.PARENT, email="sam@example.com", name="Sam Reid")
+    pat = make_user(Role.PARENT, email="pat@example.com", name="Pat Aldridge")
+    link(sam, ava)
+    link(pat, kit)
+    return SimpleNamespace(
+        admin=admin,
+        amy=amy,
+        ben=ben,
+        saplings=saplings,
+        oaks=oaks,
+        ava=ava,
+        leon=leon,
+        kit=kit,
+        sam=sam,
+        pat=pat,
+    )

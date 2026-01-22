@@ -1,4 +1,19 @@
 {% extends "base.html" %}
 {% block content %}
 <h1 class="page-title">Hello, {{ current_user.first_name }}</h1>
+<section>
+  <h2 class="section-title">Your rooms</h2>
+  {% if rooms %}
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {% for room in rooms %}
+    <div class="card">
+      <h3 class="font-semibold">{{ room.name }}</h3>
+      <p class="text-sm text-stone-600">{{ room.age_range or ("Nursery room" if room.is_nursery else "Class") }}</p>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-stone-600">You are not working in any room yet. An administrator can add you to one.</p>
+  {% endif %}
+</section>
 {% endblock %}
