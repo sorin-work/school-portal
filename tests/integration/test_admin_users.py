@@ -38,3 +38,15 @@ def test_role_filter(client, app):
     login(client, admin)
     page = client.get("/admin/users/?role=parent").data
     assert b"Pat Parent" in page and b"Ada Admin</a>" not in page
+
+
+def test_you_cannot_demote_yourself(client, app):
+    admin = make_user(Role.ADMIN)
+    login(client, admin)
+    response = client.post(
+        f"/admin/users/{admin.id}",
+        data={"name": admin.name, "email": admin.email, "role": "staff", "active": "y"},
+    )
+    assert b"cannot take away your own" in response.data
+    db.session.refresh(admin)
+    assert admin.is_admin

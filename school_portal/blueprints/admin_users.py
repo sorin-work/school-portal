@@ -1,4 +1,5 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask_login import current_user
 from flask_wtf import FlaskForm
 from sqlalchemy import func, select
 from wtforms import BooleanField, EmailField, PasswordField, SelectField, StringField
@@ -83,6 +84,8 @@ def edit(user_id: int):
         email = form.email.data.strip().lower()
         if _email_taken(email, user.id):
             form.email.errors.append("Another account uses that address.")
+        elif user.id == current_user.id and (form.role.data != "admin" or not form.active.data):
+            form.role.errors.append("You cannot take away your own administrator access.")
         else:
             user.name = form.name.data.strip()
             user.email = email
