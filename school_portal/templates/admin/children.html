@@ -7,6 +7,13 @@
 </div>
 <form method="get" class="mb-4 flex flex-wrap items-end gap-2">
   <div><label class="label" for="q">Name</label><input class="input" id="q" name="q" value="{{ term }}"></div>
+  <div>
+    <label class="label" for="room">Room</label>
+    <select class="input" id="room" name="room">
+      <option value="">All rooms</option>
+      {% for room in rooms %}<option value="{{ room.id }}" {% if room.id == room_id %}selected{% endif %}>{{ room.name }}</option>{% endfor %}
+    </select>
+  </div>
   <button class="btn btn-secondary" type="submit">Filter</button>
 </form>
 <div class="card overflow-x-auto">

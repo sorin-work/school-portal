@@ -36,6 +36,8 @@ class GuardianForm(FlaskForm):
 def index():
     query = select(Child).order_by(Child.first_name, Child.last_name)
     room_id = request.args.get("room", type=int)
+    if room_id:
+        query = query.where(Child.room_id == room_id)
     term = request.args.get("q", "").strip()
     if term:
         like = f"%{term.lower()}%"
