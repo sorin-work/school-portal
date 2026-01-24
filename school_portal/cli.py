@@ -23,3 +23,15 @@ def register_cli(app: Flask) -> None:
         user.set_password(password)
         db.session.commit()
         click.echo(f"{email} is an administrator.")
+
+    @app.cli.command("seed-demo")
+    @click.option("--force", is_flag=True, help="Seed even if there are users already.")
+    def seed_demo(force: bool) -> None:
+        """Fill an empty database with the invented demo school."""
+        from .seed import seed
+
+        if not force and db.session.scalar(select(func.count()).select_from(User)):
+            click.echo("There are users already, leaving the database alone.")
+            return
+        seed()
+        click.echo("Demo school created. Sign in as demo@example.com / demo-password.")
