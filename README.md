@@ -29,6 +29,30 @@ bound to 127.0.0.1:
 | db      | 5463 |
 | mailpit | 8033 |
 
+## Demo logins
+
+With `SEED_DEMO=true` (the default in `docker-compose.yml`) the first start
+creates an invented school, Willow Brook Nursery and School, with four rooms,
+sixteen children and their families. Every name is made up and every photo is
+drawn by the seed (coloured shapes with a caption), never a real child.
+
+All accounts use the password `demo-password`.
+
+| Email                        | Who                                                   |
+| ---------------------------- | ----------------------------------------------------- |
+| `demo@example.com`           | Dana Whitfield, administrator                         |
+| `amira.lead@example.com`     | Amira Hassan, room lead in Saplings                   |
+| `grace.lead@example.com`     | Grace Okafor, room lead in Acorns (babies)            |
+| `tom.staff@example.com`      | Tom Becker, staff in Acorns                           |
+| `leo.lead@example.com`       | Leo Marsh, lead in Oaks, also works in Saplings       |
+| `hannah.teacher@example.com` | Hannah Price, teacher of Class R                      |
+| `parent@example.com`         | Sam Taylor, mother of Ava (Saplings) and Noah (Class R) |
+| `gran@example.com`           | Chris Taylor, grandparent, timeline only              |
+| `parent2@example.com`        | Priya Nair, mother of Mila (Acorns)                   |
+| `restricted@example.com`     | Mark Reid, linked to Ava and Noah with no access      |
+
+The other families have addresses like `family3@example.com` (Isla Brennan's
+parent); the number is the child's place in the list in `school_portal/seed.py`.
 
 
 ## Development
