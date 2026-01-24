@@ -54,6 +54,22 @@ All accounts use the password `demo-password`.
 The other families have addresses like `family3@example.com` (Isla Brennan's
 parent); the number is the child's place in the list in `school_portal/seed.py`.
 
+## Configuration
+
+Everything is read from the environment. The defaults suit local
+development; `.env.example` lists them.
+
+| Variable | Default | What it does |
+| -------- | ------- | ------------ |
+| `DATABASE_URL` | `postgresql+psycopg://school:school@127.0.0.1:5463/school` | The database |
+| `SECRET_KEY` | `dev-secret-change-me` | Signs sessions; required when `APP_ENV=production` |
+| `APP_ENV` | `development` | `production` refuses the default secret |
+| `BASE_URL` | `http://127.0.0.1:4433` | Used for links in emails |
+| `SCHOOL_NAME` | `School Portal` | Until a name is saved under Settings |
+| `SCHOOL_TIMEZONE` | `Europe/London` | Where a day starts and ends |
+| `SEED_DEMO` | `false` | Seed the demo school into an empty database |
+| `SHOW_DEMO_LOGINS` | `false` | List the demo accounts on the sign-in page |
+
 
 ## Development
 
