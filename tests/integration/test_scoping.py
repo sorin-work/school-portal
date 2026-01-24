@@ -44,7 +44,9 @@ def test_read_only_links_see_but_do_not_act(school):
     assert not access.can_act_for_child(gran, school.ava)
 
 
-OTHER_CHILD_URLS = []
+OTHER_CHILD_URLS = [
+    "/children/{id}",
+]
 
 
 @pytest.mark.parametrize("template", OTHER_CHILD_URLS)
@@ -81,11 +83,24 @@ def test_medical_notes_are_staff_only_by_default(client, school):
     school.ava.medical_notes = "Inhaler in the office"
     db.session.commit()
     login(client, school.sam)
+    assert b"Inhaler" not in client.get(f"/children/{school.ava.id}").data
     assert not access.can_see_medical(school.sam, school.ava)
     assert access.can_see_medical(school.amy, school.ava)
     school.ava.share_medical_with_parents = True
     db.session.commit()
     assert access.can_see_medical(school.sam, school.ava)
+
+
+def test_parents_do_not_see_other_guardians(client, school):
+    excluded = make_user(Role.PARENT, email="excluded@example.com", name="Mark Excluded")
+    link(excluded, school.ava, access="none")
+    login(client, school.sam)
+    assert b"Mark Excluded" not in client.get(f"/children/{school.ava.id}").data
+    client.post("/logout")
+    login(client, school.amy)
+    page = client.get(f"/children/{school.ava.id}").data
+    assert b"Mark Excluded" in page
+    assert b"No access" in page
 
 
 def test_children_without_a_room_are_seen_only_by_admins(school):

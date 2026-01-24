@@ -6,6 +6,7 @@
   <h1 class="page-title mb-0">{{ child.display_name if child else "Add a child" }}</h1>
   {% if child %}
   <div class="flex flex-wrap gap-2">
+    <a class="btn btn-secondary" href="{{ url_for('children.show', child_id=child.id) }}">Profile</a>
   </div>
   {% endif %}
 </div>

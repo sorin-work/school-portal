@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% from "partials/forms.html" import field %}
+{% block title %}{{ child.display_name }} · {{ school_name }}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+  <div>
+    <h1 class="page-title mb-0">{{ child.display_name }}</h1>
+    <p class="text-sm text-stone-600">{{ child.room.name if child.room else "No room" }}{% if child.key_person %}, key person {{ child.key_person.name }}{% endif %}</p>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    {% if current_user.is_admin %}<a class="btn btn-secondary" href="{{ url_for('admin_children.edit', child_id=child.id) }}">Edit</a>{% endif %}
+  </div>
+</div>
+<div class="grid gap-4 md:grid-cols-2">
+  <section class="card">
+    <h2 class="section-title">Care</h2>
+    <dl class="space-y-2 text-sm">
+      <div><dt class="font-medium">Allergies</dt><dd>{% if child.has_allergies %}<span class="badge badge-red">Allergy</span> {{ child.allergies }}{% else %}None recorded{% endif %}</dd></div>
+      <div><dt class="font-medium">Dietary needs</dt><dd>{{ child.dietary_needs or "None recorded" }}</dd></div>
+      {% if show_medical %}
+      <div><dt class="font-medium">Medical notes{% if current_user.is_staff and not child.share_medical_with_parents %} <span class="badge badge-slate">Staff only</span>{% endif %}</dt><dd class="whitespace-pre-line">{{ child.medical_notes or "None recorded" }}</dd></div>
+      {% endif %}
+      <div><dt class="font-medium">Born</dt><dd>{{ child.date_of_birth|date }}</dd></div>
+    </dl>
+  </section>
+  {% if guardians %}
+  <section class="card">
+    <h2 class="section-title">Parents and carers</h2>
+    <ul class="space-y-2 text-sm">
+      {% for link in guardians %}
+      <li>
+        <span class="font-medium">{{ link.user.name }}</span>, {{ link.relationship_label }}{% if link.user.phone %}, {{ link.user.phone }}{% endif %}
+        {% if link.access == "none" %}<span class="badge badge-red">No access, do not share information or hand over</span>{% elif link.access == "read_only" %}<span class="badge badge-amber">Timeline only</span>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}
