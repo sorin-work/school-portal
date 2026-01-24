@@ -44,6 +44,14 @@ def test_read_only_links_see_but_do_not_act(school):
     assert not access.can_act_for_child(gran, school.ava)
 
 
+def test_key_person_sees_key_children_in_other_rooms(school):
+    school.kit.key_person_id = school.amy.id
+    db.session.commit()
+    names = {c.first_name for c in db.session.scalars(access.children_query(school.amy))}
+    assert names == {"Ava", "Leon", "Kit"}
+    assert access.can_view_child(school.amy, school.kit)
+
+
 OTHER_CHILD_URLS = [
     "/children/{id}",
 ]

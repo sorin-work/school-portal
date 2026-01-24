@@ -15,7 +15,7 @@ so a guessed id gives the same 404 as a missing one.
 
 from flask import abort
 from flask_login import current_user
-from sqlalchemy import Select, select
+from sqlalchemy import Select, or_, select
 
 from .extensions import db
 from .models import Child, Guardian, Room, RoomStaff, User
@@ -53,7 +53,7 @@ def children_query(user: User, *, include_left: bool = False) -> Select:
         return query
     if user.is_staff:
         rooms = select(RoomStaff.room_id).where(RoomStaff.user_id == user.id)
-        return query.where(Child.room_id.in_(rooms))
+        return query.where(or_(Child.room_id.in_(rooms), Child.key_person_id == user.id))
     linked = select(Guardian.child_id).where(
         Guardian.user_id == user.id, Guardian.access.in_(["full", "read_only"])
     )
@@ -70,7 +70,7 @@ def can_view_child(user: User, child: Child) -> bool:
     if user.is_admin:
         return True
     if user.is_staff:
-        return child.room_id in staff_room_ids(user)
+        return child.key_person_id == user.id or child.room_id in staff_room_ids(user)
     link = guardian_link(user, child)
     return link is not None and link.can_view
 
