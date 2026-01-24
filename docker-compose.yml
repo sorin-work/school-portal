@@ -18,6 +18,23 @@ services:
       timeout: 3s
       retries: 10
 
+  app:
+    build: .
+    restart: unless-stopped
+    environment: &app-env
+      DATABASE_URL: postgresql+psycopg://school:school@db:5432/school
+      SECRET_KEY: ${SECRET_KEY:-local-docker-secret-change-me}
+      BASE_URL: ${BASE_URL:-http://127.0.0.1:4433}
+      SCHOOL_TIMEZONE: ${SCHOOL_TIMEZONE:-Europe/London}
+      # Creates the invented demo school on first start.
+      SEED_DEMO: ${SEED_DEMO:-true}
+      # Lists the demo accounts on the sign-in page.
+      SHOW_DEMO_LOGINS: ${SHOW_DEMO_LOGINS:-true}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:4433:8000"
 
 volumes:
   db-data:

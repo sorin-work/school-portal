@@ -1,0 +1,12 @@
+.git
+.github
+.venv
+venv
+node_modules
+uploads
+**/__pycache__
+.pytest_cache
+.ruff_cache
+school_portal/static/dist
+tests
+docs
