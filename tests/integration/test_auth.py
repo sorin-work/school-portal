@@ -65,3 +65,9 @@ def test_forms_need_a_csrf_token(app):
     response = client.post("/login", data={"email": user.email, "password": PASSWORD})
     assert response.status_code in (200, 400)
     assert client.get("/").status_code == 302
+
+
+def test_demo_logins_are_listed_only_when_asked_for(client, app):
+    assert b"demo-password" not in client.get("/login").data
+    app.config["SHOW_DEMO_LOGINS"] = True
+    assert b"demo-password" in client.get("/login").data

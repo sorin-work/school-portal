@@ -10,5 +10,16 @@
     {{ field(form.password) }}
     <button class="btn btn-primary w-full" type="submit">Sign in</button>
   </form>
+  {% if demo %}
+  <div class="card mt-6 text-sm">
+    <h2 class="font-semibold">Demo accounts</h2>
+    <p class="hint">All use the password <code>demo-password</code>.</p>
+    <ul class="mt-2 space-y-1">
+      {% for email, what in demo %}
+      <li><code>{{ email }}</code> <span class="text-stone-600">{{ what }}</span></li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

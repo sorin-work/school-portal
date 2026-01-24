@@ -1,4 +1,4 @@
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from flask_wtf import FlaskForm
 from sqlalchemy import func, select
@@ -10,6 +10,15 @@ from ..extensions import db
 from ..models import User
 
 bp = Blueprint("auth", __name__)
+
+DEMO_LOGINS = [
+    ("demo@example.com", "Administrator"),
+    ("amira.lead@example.com", "Staff, room lead in Saplings"),
+    ("tom.staff@example.com", "Staff in Acorns"),
+    ("parent@example.com", "Parent of two children"),
+    ("parent2@example.com", "Parent of one child"),
+    ("restricted@example.com", "Guardian with no access (court order)"),
+]
 
 
 class LoginForm(FlaskForm):
@@ -52,6 +61,8 @@ def login():
 
 
 def _demo():
+    if current_app.config.get("SHOW_DEMO_LOGINS"):
+        return DEMO_LOGINS
     return []
 
 
