@@ -11,6 +11,7 @@ RUN npm run css
 FROM python:3.13-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
 WORKDIR /app
+RUN useradd --create-home --uid 1000 portal
 COPY pyproject.toml ./
 COPY school_portal school_portal
 RUN pip install .
@@ -20,7 +21,8 @@ COPY docker/entrypoint.sh /entrypoint.sh
 COPY --from=css /build/school_portal/static/dist /app/school_portal/static/dist
 # The package was installed before the CSS existed; serve static files from /app.
 ENV PYTHONPATH=/app UPLOAD_DIR=/data/uploads
-RUN mkdir -p /data/uploads
+RUN mkdir -p /data/uploads && chown -R portal /data
+USER portal
 EXPOSE 8000
 ENTRYPOINT ["sh", "/entrypoint.sh"]
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--access-logfile", "-", "school_portal:create_app()"]
