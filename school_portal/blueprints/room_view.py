@@ -8,10 +8,10 @@ from sqlalchemy import select
 
 from .. import access, timeutil
 from ..decorators import staff_required
-from ..events import child_days
+from ..events import child_days, log_event
 from ..extensions import db
-from ..models import Child, Room
-from ..models.event import AMOUNTS, MEALS
+from ..models import Child, Event, Room
+from ..models.event import AMOUNTS, MEALS, MOODS, NAPPY, TOILET
 
 bp = Blueprint("room_view", __name__, url_prefix="/rooms")
 
@@ -70,3 +70,92 @@ def show(room_id: int):
         meals=MEALS,
         amounts=AMOUNTS,
     )
+
+
+@bp.get("/<int:room_id>/children/<int:child_id>/panel")
+@staff_required
+def panel(room_id: int, child_id: int):
+    room = room_or_404(room_id)
+    child = child_in_room(room, child_id)
+    day = child_days([child], timeutil.today())[child.id]
+    return render_template(
+        "rooms/_panel.html",
+        room=room,
+        child=child,
+        day=day,
+        nappy=NAPPY,
+        toilet=TOILET,
+        moods=MOODS,
+    )
+
+
+def _tile_response(room: Room, child: Child, message: str):
+    day = child_days([child], timeutil.today())[child.id]
+    return render_template(
+        "rooms/_logged.html",
+        room=room,
+        child=child,
+        day=day,
+        message=message,
+        nappy=NAPPY,
+        toilet=TOILET,
+        moods=MOODS,
+    )
+
+
+@bp.post("/<int:room_id>/children/<int:child_id>/log")
+@staff_required
+def quick_log(room_id: int, child_id: int):
+    room = room_or_404(room_id)
+    child = child_in_room(room, child_id)
+    kind = request.form.get("kind", "")
+    when = when_from_form()
+    visibility = visibility_from_form()
+    note = (request.form.get("note") or "").strip() or None
+    if kind == "nappy" and room.is_nursery:
+        value = request.form.get("value", "")
+        if value not in dict(NAPPY):
+            abort(400)
+        log_event(child, room, "nappy", when, {"type": value}, note, visibility)
+        message = "Nappy logged"
+    elif kind == "toilet":
+        value = request.form.get("value", "")
+        if value not in dict(TOILET):
+            abort(400)
+        log_event(child, room, "toilet", when, {"result": value}, note, visibility)
+        message = "Toilet logged"
+    elif kind == "mood":
+        value = request.form.get("value", "")
+        if value not in dict(MOODS):
+            abort(400)
+        log_event(child, room, "mood", when, {"mood": value}, note, visibility)
+        message = "Mood logged"
+    elif kind == "nap" and room.is_nursery:
+        if child_days([child], timeutil.today())[child.id].open_nap is not None:
+            return _tile_response(room, child, "Already asleep")
+        log_event(child, room, "nap", when, {}, note, visibility)
+        message = "Nap started"
+    elif kind == "note":
+        if not note:
+            return _tile_response(room, child, "Write the note first")
+        log_event(child, room, "note", when, {}, note, visibility)
+        message = "Note added"
+    else:
+        abort(400)
+    db.session.commit()
+    return _tile_response(room, child, message)
+
+
+@bp.post("/<int:room_id>/naps/<int:event_id>/end")
+@staff_required
+def end_nap(room_id: int, event_id: int):
+    room = room_or_404(room_id)
+    event = db.session.get(Event, event_id)
+    if event is None or event.kind != "nap" or event.deleted_at is not None:
+        abort(404)
+    child = child_in_room(room, event.child_id)
+    event.ended_at = when_from_form()
+    event.updated_at = timeutil.now()
+    event.updated_by_id = current_user.id
+    db.session.commit()
+    return _tile_response(room, child, "Awake")

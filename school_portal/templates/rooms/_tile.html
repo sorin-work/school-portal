@@ -1,7 +1,8 @@
 {% set day = days[child.id] if days is defined else day %}
 {% set classes = "tile w-full" %}
 <div id="tile-{{ child.id }}" {% if oob %}hx-swap-oob="true"{% endif %}>
-  <button type="button" class="{{ classes }}">
+  <button type="button" class="{{ classes }}"
+    hx-get="{{ url_for('room_view.panel', room_id=room.id, child_id=child.id) }}" hx-target="#panel" hx-swap="innerHTML">
     <span class="flex items-center justify-between gap-2">
       <span class="text-base font-semibold">{{ child.short_name }}</span>
     </span>
