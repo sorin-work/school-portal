@@ -10,6 +10,9 @@
       <h3 class="font-semibold">{{ room.name }}</h3>
       <p class="text-sm text-stone-600">{{ room.age_range or ("Nursery room" if room.is_nursery else "Class") }}</p>
       <p class="mt-2 text-sm">{{ sizes.get(room.id, 0) }} children</p>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <a class="btn btn-primary" href="{{ url_for('room_view.show', room_id=room.id) }}">Open room</a>
+      </div>
     </div>
     {% endfor %}
   </div>

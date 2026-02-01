@@ -1,0 +1,12 @@
+{% set day = days[child.id] if days is defined else day %}
+{% set classes = "tile w-full" %}
+<div id="tile-{{ child.id }}" {% if oob %}hx-swap-oob="true"{% endif %}>
+  <button type="button" class="{{ classes }}">
+    <span class="flex items-center justify-between gap-2">
+      <span class="text-base font-semibold">{{ child.short_name }}</span>
+    </span>
+    <span class="mt-1 text-xs text-stone-600">
+      {% if day.open_nap %}Asleep since {{ day.open_nap.occurred_at|time }}{% elif day.last %}{{ day.last.summary() }}, {{ day.last.occurred_at|time }}{% else %}Nothing logged yet{% endif %}
+    </span>
+  </button>
+</div>

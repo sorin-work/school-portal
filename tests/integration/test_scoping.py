@@ -85,6 +85,27 @@ def test_excluded_guardian_gets_404(client, school):
 def test_parents_cannot_open_staff_pages(client, school):
     login(client, school.sam)
     assert client.get("/admin/children/").status_code == 403
+    assert client.get(f"/rooms/{school.saplings.id}").status_code == 403
+
+
+def test_staff_cannot_open_other_rooms(client, school):
+    login(client, school.amy)
+    assert client.get(f"/rooms/{school.saplings.id}").status_code == 200
+    assert client.get(f"/rooms/{school.oaks.id}").status_code == 404
+    response = client.post(
+        f"/rooms/{school.oaks.id}/children/{school.kit.id}/log",
+        data={"kind": "mood", "value": "happy"},
+    )
+    assert response.status_code == 404
+
+
+def test_a_child_from_another_room_cannot_be_logged_through_this_room(client, school):
+    login(client, school.amy)
+    response = client.post(
+        f"/rooms/{school.saplings.id}/children/{school.kit.id}/log",
+        data={"kind": "mood", "value": "happy"},
+    )
+    assert response.status_code == 404
 
 
 def test_medical_notes_are_staff_only_by_default(client, school):

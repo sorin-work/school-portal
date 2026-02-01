@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Rooms · {{ school_name }}{% endblock %}
+{% block content %}
+<h1 class="page-title">Rooms</h1>
+<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  {% for room in rooms %}
+  <a class="card block hover:border-emerald-500" href="{{ url_for('room_view.show', room_id=room.id) }}">
+    <span class="text-lg font-semibold">{{ room.name }}</span>
+    <span class="block text-sm text-stone-600">{{ room.age_range or "" }}</span>
+  </a>
+  {% else %}
+  <p class="text-stone-600">You are not working in any room yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -56,6 +56,9 @@ def _register_blueprints(app: Flask) -> None:
     from .blueprints import children
 
     app.register_blueprint(children.bp)
+    from .blueprints import room_view
+
+    app.register_blueprint(room_view.bp)
 
 
 def _register_error_pages(app: Flask) -> None:
