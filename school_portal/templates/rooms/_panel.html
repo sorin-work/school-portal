@@ -4,6 +4,8 @@
     <a class="link text-sm" href="{{ url_for('children.show', child_id=child.id) }}">Profile</a>
   </div>
   {% if message %}<p class="flash flash-success mb-0">{{ message }}</p>{% endif %}
+  {% if child.has_allergies %}<p class="text-sm text-red-800">Allergies: {{ child.allergies }}</p>{% endif %}
+  {% if child.dietary_needs %}<p class="text-sm text-stone-700">Diet: {{ child.dietary_needs }}</p>{% endif %}
   {% set post = url_for('room_view.quick_log', room_id=room.id, child_id=child.id) %}
   {% if room.is_nursery %}
   <div>
