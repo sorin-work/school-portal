@@ -1,8 +1,9 @@
 """The room view: a tablet-friendly page for logging the day as it happens."""
 
+import uuid
 from datetime import datetime
 
-from flask import Blueprint, abort, redirect, render_template, request, url_for
+from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user
 from sqlalchemy import select
 
@@ -159,3 +160,51 @@ def end_nap(room_id: int, event_id: int):
     event.updated_by_id = current_user.id
     db.session.commit()
     return _tile_response(room, child, "Awake")
+
+
+@bp.post("/<int:room_id>/bulk")
+@staff_required
+def bulk(room_id: int):
+    """Log the same thing for several children, for example lunch."""
+    room = room_or_404(room_id)
+    kind = request.form.get("kind")
+    ids = {int(v) for v in request.form.getlist("child_ids") if v.isdigit()}
+    children = [c for c in room_children(room) if c.id in ids]
+    if not children:
+        flash("Choose at least one child.", "error")
+        return redirect(url_for(".show", room_id=room.id))
+    when = when_from_form()
+    note = (request.form.get("note") or "").strip() or None
+    visibility = visibility_from_form()
+    batch = uuid.uuid4().hex
+    if kind == "meal":
+        meal = request.form.get("meal")
+        if meal not in MEALS:
+            abort(400)
+        menu = (request.form.get("menu") or "").strip()[:200]
+        default_amount = request.form.get("amount", "all")
+        for child in children:
+            # A per-child amount overrides the one for everyone.
+            amount = request.form.get(f"amount_{child.id}") or default_amount
+            if amount not in dict(AMOUNTS):
+                abort(400)
+            details = {"meal": meal, "amount": amount}
+            if menu:
+                details["menu"] = menu
+            log_event(child, room, "meal", when, details, note, visibility, batch=batch)
+        label = meal
+    elif kind == "activity":
+        title = (request.form.get("title") or "").strip()[:200]
+        if not title:
+            flash("Give the activity a title.", "error")
+            return redirect(url_for(".show", room_id=room.id))
+        for child in children:
+            log_event(
+                child, room, "activity", when, {"title": title}, note, visibility, batch=batch
+            )
+        label = title
+    else:
+        abort(400)
+    db.session.commit()
+    flash(f"Logged {label} for {len(children)} children.", "success")
+    return redirect(url_for(".show", room_id=room.id))

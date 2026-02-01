@@ -20,6 +20,37 @@
   </div>
   <aside class="space-y-6">
     <div id="panel" class="card min-h-24 text-sm text-stone-600" aria-live="polite">Tap a child to log a nap, a nappy, a mood or a note.</div>
+    <form method="post" action="{{ url_for('room_view.bulk', room_id=room.id) }}" class="card space-y-3">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <h2 class="section-title">For several children</h2>
+      <div class="flex gap-4 text-sm">
+        <label class="flex items-center gap-2"><input type="radio" name="kind" value="meal" checked> Meal</label>
+        <label class="flex items-center gap-2"><input type="radio" name="kind" value="activity"> Activity</label>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="label" for="meal">Meal</label>
+          <select class="input" id="meal" name="meal">{% for meal in meals %}<option value="{{ meal }}" {% if meal == "lunch" %}selected{% endif %}>{{ meal|title }}</option>{% endfor %}</select>
+        </div>
+        <div>
+          <label class="label" for="amount">Ate</label>
+          <select class="input" id="amount" name="amount">{% for value, label in amounts %}<option value="{{ value }}">{{ label }}</option>{% endfor %}</select>
+        </div>
+      </div>
+      <div><label class="label" for="menu">Menu</label><input class="input" id="menu" name="menu" placeholder="Shepherd's pie, peas"></div>
+      <div><label class="label" for="title">Activity</label><input class="input" id="title" name="title" placeholder="Painting with leaves"></div>
+      <div><label class="label" for="bulk-note">Note</label><textarea class="input" id="bulk-note" name="note" rows="2"></textarea></div>
+      <div class="flex items-center justify-between">
+        <span class="label mb-0">Children</span>
+      </div>
+      <div id="bulk-children" class="grid grid-cols-2 gap-1 text-sm">
+        {% for child in children %}
+        {% set state = days[child.id] %}
+        <label class="flex items-center gap-2"><input type="checkbox" name="child_ids" value="{{ child.id }}" checked> {{ child.short_name }}</label>
+        {% endfor %}
+      </div>
+      <button class="btn btn-primary btn-big w-full" type="submit">Log for the ticked children</button>
+    </form>
   </aside>
 </div>
 {% endblock %}
