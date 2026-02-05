@@ -58,4 +58,14 @@
     <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="visibility" value="staff"> Staff only</label>
     <button class="btn btn-secondary w-full" type="submit">Add the note</button>
   </form>
+  {% if day.events %}
+  <div>
+    <p class="label">Today</p>
+    <ul class="space-y-1 text-sm">
+      {% for event in day.events|reverse %}
+      <li><span class="text-stone-500">{{ event.occurred_at|time }}</span> {{ event.summary() }}{% if event.staff_only %} <span class="badge badge-slate">Staff only</span>{% endif %}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
 </div>
