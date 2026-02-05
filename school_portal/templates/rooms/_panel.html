@@ -55,6 +55,7 @@
     <input type="hidden" name="kind" value="note">
     <label class="label" for="note-{{ child.id }}">Note</label>
     <textarea class="input" id="note-{{ child.id }}" name="note" rows="2"></textarea>
+    <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="visibility" value="staff"> Staff only</label>
     <button class="btn btn-secondary w-full" type="submit">Add the note</button>
   </form>
 </div>
