@@ -4,7 +4,7 @@
   <button type="button" class="{{ classes }}"
     hx-get="{{ url_for('room_view.panel', room_id=room.id, child_id=child.id) }}" hx-target="#panel" hx-swap="innerHTML">
     <span class="flex items-center justify-between gap-2">
-      <span class="text-base font-semibold">{{ child.short_name }}</span>
+      <span class="min-w-0 truncate text-base font-semibold" title="{{ child.display_name }}">{{ child.short_name }}</span>
       {% if child.has_allergies %}<span class="badge badge-red" title="{{ child.allergies }}">Allergy</span>{% endif %}
     </span>
     <span class="mt-1 text-xs text-stone-600">
