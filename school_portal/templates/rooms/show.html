@@ -49,6 +49,13 @@
         <label class="flex items-center gap-2"><input type="checkbox" name="child_ids" value="{{ child.id }}" checked> {{ child.short_name }}</label>
         {% endfor %}
       </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div><label class="label" for="bulk-at">Time</label><input class="input" type="time" id="bulk-at" name="at"></div>
+        <div>
+          <label class="label" for="bulk-vis">Who sees it</label>
+          <select class="input" id="bulk-vis" name="visibility"><option value="parents">Families</option><option value="staff">Staff only</option></select>
+        </div>
+      </div>
       <button class="btn btn-primary btn-big w-full" type="submit">Log for the ticked children</button>
     </form>
   </aside>
