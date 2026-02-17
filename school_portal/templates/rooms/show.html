@@ -43,6 +43,7 @@
       <div><label class="label" for="bulk-note">Note</label><textarea class="input" id="bulk-note" name="note" rows="2"></textarea></div>
       <div class="flex items-center justify-between">
         <span class="label mb-0">Children</span>
+        <button type="button" class="link text-sm" data-check-all="#bulk-children">All or none</button>
       </div>
       <div id="bulk-children" class="grid grid-cols-2 gap-1 text-sm">
         {% for child in children %}
