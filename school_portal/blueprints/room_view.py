@@ -155,7 +155,12 @@ def end_nap(room_id: int, event_id: int):
     if event is None or event.kind != "nap" or event.deleted_at is not None:
         abort(404)
     child = child_in_room(room, event.child_id)
-    event.ended_at = when_from_form()
+    if event.ended_at is not None:
+        return _tile_response(room, child, "That nap was already ended")
+    end = when_from_form()
+    if end <= event.occurred_at:
+        return _tile_response(room, child, "The end must be after the start")
+    event.ended_at = end
     event.updated_at = timeutil.now()
     event.updated_by_id = current_user.id
     db.session.commit()

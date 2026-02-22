@@ -68,6 +68,21 @@ def test_nap_start_and_end(client, school):
     assert nap.summary() == "Slept for 1h 15m"
 
 
+def test_a_nap_cannot_end_twice_or_before_it_started(client, school):
+    login(client, school.amy)
+    client.post(
+        f"/rooms/{school.saplings.id}/children/{school.ava.id}/log",
+        data={"kind": "nap", "at": "12:30"},
+    )
+    (nap,) = events_of(school.ava, "nap")
+    end = f"/rooms/{school.saplings.id}/naps/{nap.id}/end"
+    assert b"after the start" in client.post(end, data={"at": "12:00"}).data
+    client.post(end, data={"at": "13:00"})
+    assert b"already ended" in client.post(end, data={"at": "14:00"}).data
+    db.session.refresh(nap)
+    assert nap.ended_at.minute == 0
+
+
 def test_nappies_only_in_nursery_rooms(client, school):
     school.saplings.kind = "class"
     db.session.commit()
