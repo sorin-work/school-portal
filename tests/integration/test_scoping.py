@@ -54,6 +54,7 @@ def test_key_person_sees_key_children_in_other_rooms(school):
 
 OTHER_CHILD_URLS = [
     "/children/{id}",
+    "/children/{id}/diary",
 ]
 
 

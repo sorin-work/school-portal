@@ -8,6 +8,7 @@
     <p class="text-sm text-stone-600">{{ child.room.name if child.room else "No room" }}, {{ child.age_on(today) }}{% if child.key_person %}, key person {{ child.key_person.name }}{% endif %}</p>
   </div>
   <div class="flex flex-wrap gap-2">
+    <a class="btn btn-primary" href="{{ url_for('timeline.child_day', child_id=child.id) }}">Diary</a>
     {% if current_user.is_admin %}<a class="btn btn-secondary" href="{{ url_for('admin_children.edit', child_id=child.id) }}">Edit</a>{% endif %}
   </div>
 </div>

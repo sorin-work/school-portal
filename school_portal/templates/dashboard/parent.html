@@ -10,6 +10,7 @@
       <h3 class="text-lg font-semibold">{{ child.display_name }}</h3>
       <p class="text-sm text-stone-600">{{ child.room.name if child.room else "No room yet" }}</p>
       <div class="mt-3 flex flex-wrap gap-2">
+        <a class="btn btn-primary" href="{{ url_for('timeline.child_day', child_id=child.id) }}">Today's diary</a>
         <a class="btn btn-secondary" href="{{ url_for('children.show', child_id=child.id) }}">Details</a>
       </div>
     </div>

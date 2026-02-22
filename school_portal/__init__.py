@@ -59,6 +59,9 @@ def _register_blueprints(app: Flask) -> None:
     from .blueprints import room_view
 
     app.register_blueprint(room_view.bp)
+    from .blueprints import timeline
+
+    app.register_blueprint(timeline.bp)
 
 
 def _register_error_pages(app: Flask) -> None:

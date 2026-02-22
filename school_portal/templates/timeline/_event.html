@@ -1,0 +1,10 @@
+<li id="event-{{ event.id }}" class="card">
+  <div class="flex flex-wrap items-center gap-2">
+    <span class="w-12 text-sm font-medium text-stone-600">{{ event.occurred_at|time }}</span>
+    <span class="badge badge-{{ event.colour }}">{{ event.label }}</span>
+    <span class="font-medium">{{ event.summary() }}</span>
+    {% if event.staff_only %}<span class="badge badge-slate">Staff only</span>{% endif %}
+  </div>
+  {% if event.kind == "nap" and event.ended_at %}<p class="mt-1 text-sm text-stone-600">{{ event.occurred_at|time }} to {{ event.ended_at|time }}</p>{% endif %}
+  {% if event.note and (event.kind not in ("note", "incident", "accident") or event.note|length > 80) %}<p class="mt-2 whitespace-pre-line text-sm">{{ event.note }}</p>{% endif %}
+</li>
