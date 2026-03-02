@@ -13,4 +13,14 @@ document.addEventListener("click", (event) => {
   });
 });
 
+// htmx sends the CSRF header from the body's hx-headers; this keeps a
+// response error from failing silently on a tablet.
+document.addEventListener("htmx:responseError", (event) => {
+  const status = event.detail.xhr.status;
+  const box = document.getElementById("htmx-error");
+  if (box) {
+    box.textContent = status === 400 ? "The page is out of date, reload it and try again." : "Something went wrong (" + status + "). Try again.";
+    box.hidden = false;
+  }
+});
 
