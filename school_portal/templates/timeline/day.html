@@ -6,6 +6,10 @@
     <h1 class="page-title mb-0">{{ child.display_name }}</h1>
     <p class="text-stone-600">{{ day|day }}</p>
   </div>
+  <nav class="flex gap-2" aria-label="Days">
+    <a class="btn btn-secondary" href="{{ url_for('timeline.child_day', child_id=child.id, day=previous.isoformat()) }}">Previous day</a>
+    {% if following %}<a class="btn btn-secondary" href="{{ url_for('timeline.child_day', child_id=child.id, day=following.isoformat()) }}">Next day</a>{% endif %}
+  </nav>
 </div>
 <ol class="space-y-3">
   {% for event in events %}
