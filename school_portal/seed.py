@@ -6,13 +6,13 @@ never contains a picture of a real child.
 
 import io
 import random
-from datetime import date, timedelta
+from datetime import date, time, timedelta
 
 from PIL import Image, ImageDraw
 
 from . import timeutil
 from .extensions import db
-from .models import Child, Guardian, Role, Room, RoomStaff, User
+from .models import Child, Event, Guardian, Role, Room, RoomStaff, User
 
 PASSWORD = "demo-password"
 
@@ -237,4 +237,133 @@ def seed() -> None:
         db.session.add(Guardian(child=children[first], user=user, relationship_label="Parent"))
     db.session.flush()
 
+    _seed_days(rng, today, rooms, children, users)
     db.session.commit()
+
+
+MENUS = {
+    "breakfast": "Porridge with banana",
+    "snack": "Apple slices and rice cakes",
+    "lunch": "Vegetable lasagne and peas",
+    "tea": "Jacket potato and beans",
+}
+
+ACTIVITIES = {
+    "Acorns": [
+        "Treasure basket",
+        "Messy play with jelly",
+        "Singing time",
+        "Garden walk in the buggies",
+    ],
+    "Saplings": [
+        "Painting with leaves",
+        "Building towers",
+        "Story time: The Gruffalo",
+        "Water play",
+    ],
+    "Oaks": ["Planting cress", "Obstacle course", "Counting conkers", "Role play shop"],
+    "Class R": ["Phonics: the sh sound", "Number bonds to ten", "PE: ball skills", "Forest school"],
+}
+
+
+def _seed_days(rng, today, rooms, children, users) -> None:
+    staff_by_room = {
+        "Acorns": users["grace.lead@example.com"],
+        "Saplings": users["amira.lead@example.com"],
+        "Oaks": users["leo.lead@example.com"],
+        "Class R": users["hannah.teacher@example.com"],
+    }
+    now = timeutil.now()
+    for day in school_days(today, 6):
+        is_today = day == today
+        for child in children.values():
+            room = child.room
+            by = staff_by_room[room.name]
+
+            def at(hour, minute, _day=day):
+                return timeutil.at(_day, time(hour, minute))
+
+            def add(
+                kind,
+                when,
+                details=None,
+                note=None,
+                visibility="parents",
+                ended=None,
+                *,
+                _child=child,
+                _room=room,
+                _by=by,
+            ):
+                if when > now:
+                    return None
+                event = Event(
+                    child_id=_child.id,
+                    room_id=_room.id,
+                    kind=kind,
+                    occurred_at=when,
+                    ended_at=ended if ended is None or ended <= now else None,
+                    details=details or {},
+                    note=note,
+                    visibility=visibility,
+                    created_by_id=_by.id,
+                )
+                db.session.add(event)
+                return event
+
+            add("mood", at(9, 5), {"mood": rng.choice(["happy", "settled", "settled", "tired"])})
+            if room.name != "Class R":
+                add(
+                    "meal",
+                    at(9, 30),
+                    {
+                        "meal": "snack",
+                        "amount": rng.choice(["all", "most"]),
+                        "menu": MENUS["snack"],
+                    },
+                )
+            add(
+                "meal",
+                at(11, 45),
+                {
+                    "meal": "lunch",
+                    "amount": rng.choice(["all", "most", "some"]),
+                    "menu": MENUS["lunch"],
+                },
+            )
+            if room.is_nursery and room.name != "Oaks":
+                start = at(12, 30 + rng.randint(0, 20))
+                add("nap", start, ended=start + timedelta(minutes=rng.randint(45, 110)))
+                for hour in (10, 13, 15):
+                    add(
+                        "nappy",
+                        at(hour, rng.randint(0, 50)),
+                        {"type": rng.choice(["wet", "wet", "dirty", "dry"])},
+                    )
+            elif room.name == "Oaks":
+                add("toilet", at(10, 40), {"result": rng.choice(["wee", "tried"])})
+            if room.name != "Class R":
+                add(
+                    "meal",
+                    at(15, 30),
+                    {
+                        "meal": "tea",
+                        "amount": rng.choice(["all", "most", "some"]),
+                        "menu": MENUS["tea"],
+                    },
+                )
+            title = ACTIVITIES[room.name][day.toordinal() % 4]
+            add("activity", at(10, 15), {"title": title})
+        # A staff-only note: families never see it.
+        if not is_today or timeutil.now() > timeutil.at(day, time(14, 0)):
+            db.session.add(
+                Event(
+                    child_id=children["Theo"].id,
+                    room_id=rooms["Acorns"].id,
+                    kind="note",
+                    occurred_at=timeutil.at(day, time(14, 0)),
+                    note="Unsettled after drop-off, settled with his comforter. Keep an eye on it.",
+                    visibility="staff",
+                    created_by_id=users["tom.staff@example.com"].id,
+                )
+            )
