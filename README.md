@@ -8,6 +8,20 @@ parents and carers see their own children's diary, and nothing else.
 It is a Flask app with server-rendered pages, htmx for the quick logging and
 PostgreSQL for everything, including the small job queue the worker runs.
 
+## Features
+
+- **Roles.** Administrators, staff and parents or carers. Staff work in one or
+  more rooms and can be the room lead or a child's key person. A child can
+  have several parents and carers.
+- **Rooms and children.** Nursery rooms and school classes, children with
+  dietary needs, allergies and medical notes. Medical notes are staff only
+  unless the family is meant to see them. Allergies show on the child's tile
+  in the room view.
+- **The room view.** A tablet-friendly page per room: tap a child to log a
+  nap (start and end), a nappy, the toilet, a mood or a note; log a meal or
+  an activity for several children at once ("everyone had lunch", with a
+  different amount for the child who left half).
+- **Visibility.** Every diary entry is for the family or for staff only.
 
 ## Quick start
 
