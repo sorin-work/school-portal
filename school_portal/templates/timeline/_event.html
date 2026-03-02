@@ -7,4 +7,9 @@
   </div>
   {% if event.kind == "nap" and event.ended_at %}<p class="mt-1 text-sm text-stone-600">{{ event.occurred_at|time }} to {{ event.ended_at|time }}</p>{% endif %}
   {% if event.note and (event.kind not in ("note", "incident", "accident") or event.note|length > 80) %}<p class="mt-2 whitespace-pre-line text-sm">{{ event.note }}</p>{% endif %}
+  {% if current_user.is_staff %}
+  <p class="mt-2 text-xs text-stone-500">
+    By {{ event.created_by.name if event.created_by else "someone" }}{% if event.updated_at %}, changed by {{ event.updated_by.name if event.updated_by else "someone" }} at {{ event.updated_at|time }}{% endif %}
+  </p>
+  {% endif %}
 </li>
