@@ -26,7 +26,7 @@
       {% for area in areas %}<option value="{{ area.id }}" {% if request.form.get("area_id") == area.id|string %}selected{% endif %}>{{ area.framework }}: {{ area.name }}</option>{% endfor %}
     </select>
   </div>
-  <div><label class="label" for="note">What I saw</label><textarea class="input" id="note" name="note" rows="5"></textarea></div>
+  <div><label class="label" for="note">What I saw</label><textarea class="input" id="note" name="note" rows="5">{{ request.form.get("note", "") }}</textarea></div>
   <div><label class="label" for="next_steps">Next steps</label><textarea class="input" id="next_steps" name="next_steps" rows="2">{{ request.form.get("next_steps", "") }}</textarea></div>
   <div class="grid grid-cols-2 gap-3">
     <div><label class="label" for="at">Time</label><input class="input" type="time" id="at" name="at" value="{{ request.form.get('at', '') }}"></div>
