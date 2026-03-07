@@ -11,7 +11,7 @@ from .. import access, timeutil
 from ..decorators import staff_required
 from ..events import child_days, log_event
 from ..extensions import db
-from ..models import Child, Event, Room
+from ..models import Child, CurriculumArea, Event, Room
 from ..models.event import AMOUNTS, MEALS, MOODS, NAPPY, TOILET
 
 bp = Blueprint("room_view", __name__, url_prefix="/rooms")
@@ -213,3 +213,47 @@ def bulk(room_id: int):
     db.session.commit()
     flash(f"Logged {label} for {len(children)} children.", "success")
     return redirect(url_for(".show", room_id=room.id))
+
+
+@bp.route("/<int:room_id>/observe", methods=["GET", "POST"])
+@staff_required
+def observe(room_id: int):
+    """A learning observation for one or more children, with photos."""
+    room = room_or_404(room_id)
+    children = room_children(room)
+    areas = list(db.session.scalars(select(CurriculumArea).order_by(CurriculumArea.sort_order)))
+    errors: list[str] = []
+    if request.method == "POST":
+        ids = {int(v) for v in request.form.getlist("child_ids") if v.isdigit()}
+        chosen = [c for c in children if c.id in ids]
+        note = (request.form.get("note") or "").strip()
+        area_id = request.form.get("area_id", type=int)
+        if area_id and area_id not in {a.id for a in areas}:
+            area_id = None
+        if not chosen:
+            errors.append("Choose the children the observation is about.")
+        if not note:
+            errors.append("Describe what you saw.")
+        if not errors:
+            batch = uuid.uuid4().hex
+            when = when_from_form()
+            details = {}
+            for child in chosen:
+                event = log_event(
+                    child,
+                    room,
+                    "observation",
+                    when,
+                    details,
+                    note,
+                    visibility_from_form(),
+                    batch=batch,
+                )
+                event.area_id = area_id
+            db.session.commit()
+            flash(f"Observation saved for {len(chosen)} children.", "success")
+            return redirect(url_for(".show", room_id=room.id))
+        db.session.rollback()
+    return render_template(
+        "rooms/observe.html", room=room, children=children, areas=areas, errors=errors
+    )

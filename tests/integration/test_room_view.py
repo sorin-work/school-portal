@@ -112,3 +112,32 @@ def test_unknown_values_are_refused(client, school):
     url = f"/rooms/{school.saplings.id}/children/{school.ava.id}/log"
     assert client.post(url, data={"kind": "mood", "value": "ecstatic"}).status_code == 400
     assert client.post(url, data={"kind": "rocket"}).status_code == 400
+
+
+def test_an_observation_for_two_children(client, school):
+    from school_portal.models import CurriculumArea
+
+    area = CurriculumArea(framework="EYFS", code="EYFS-M", name="Mathematics")
+    db.session.add(area)
+    db.session.commit()
+    login(client, school.amy)
+    response = client.post(
+        f"/rooms/{school.saplings.id}/observe",
+        data={
+            "child_ids": [str(school.ava.id), str(school.leon.id)],
+            "area_id": str(area.id),
+            "note": "Counted the pours together",
+            "next_steps": "Counting to ten",
+        },
+    )
+    assert response.status_code == 302
+    (ava_obs,) = events_of(school.ava, "observation")
+    assert ava_obs.area_id == area.id
+    assert len(events_of(school.leon, "observation")) == 1
+
+
+def test_an_observation_needs_children_and_a_note(client, school):
+    login(client, school.amy)
+    response = client.post(f"/rooms/{school.saplings.id}/observe", data={"note": ""})
+    assert b"Choose the children" in response.data
+    assert b"Describe what you saw" in response.data

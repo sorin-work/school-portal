@@ -110,6 +110,15 @@ FAMILY_NAMES = {
     "Szabo": "Gabor Szabo",
 }
 
+EYFS = [
+    ("EYFS-CL", "Communication and language"),
+    ("EYFS-PD", "Physical development"),
+    ("EYFS-PSED", "Personal, social and emotional development"),
+    ("EYFS-L", "Literacy"),
+    ("EYFS-M", "Mathematics"),
+    ("EYFS-UW", "Understanding the world"),
+    ("EYFS-EAD", "Expressive arts and design"),
+]
 
 PALETTE = [(244, 162, 97), (42, 157, 143), (233, 196, 106), (138, 177, 125), (110, 140, 200)]
 

@@ -21,6 +21,8 @@ PostgreSQL for everything, including the small job queue the worker runs.
   nap (start and end), a nappy, the toilet, a mood or a note; log a meal or
   an activity for several children at once ("everyone had lunch", with a
   different amount for the child who left half).
+- **Learning observations** for one or more children, linked to an area of
+  the EYFS (or any framework the school adds), with next steps.
 - **Visibility.** Every diary entry is for the family or for staff only.
 
 ## Quick start
