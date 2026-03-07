@@ -14,6 +14,7 @@ KINDS = {
     "nappy": ("Nappy", "stone"),
     "toilet": ("Toilet", "stone"),
     "mood": ("Mood", "pink"),
+    "observation": ("Learning", "emerald"),
     "note": ("Note", "slate"),
 }
 
@@ -49,6 +50,9 @@ class Event(db.Model):
     visibility: Mapped[str] = mapped_column(String(8), default="parents")
     # Events logged together ("everyone had lunch") share a batch id.
     batch_id: Mapped[str | None] = mapped_column(String(32), index=True)
+    area_id: Mapped[int | None] = mapped_column(
+        ForeignKey("curriculum_areas.id", ondelete="SET NULL")
+    )
     created_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
@@ -59,6 +63,7 @@ class Event(db.Model):
     room = relationship("Room")
     created_by = relationship("User", foreign_keys=[created_by_id])
     updated_by = relationship("User", foreign_keys=[updated_by_id])
+    area = relationship("CurriculumArea")
 
     @property
     def label(self) -> str:
@@ -101,3 +106,15 @@ class Event(db.Model):
         if d.get("title"):
             return d["title"]
         return (self.note or self.label)[:80]
+
+
+class CurriculumArea(db.Model):
+    """An area of learning, for example from the EYFS or a key stage."""
+
+    __tablename__ = "curriculum_areas"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    framework: Mapped[str] = mapped_column(String(20))
+    code: Mapped[str] = mapped_column(String(20), unique=True)
+    name: Mapped[str] = mapped_column(String(120))
+    sort_order: Mapped[int] = mapped_column(default=0)
