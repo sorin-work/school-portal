@@ -133,6 +133,7 @@ def test_an_observation_for_two_children(client, school):
     assert response.status_code == 302
     (ava_obs,) = events_of(school.ava, "observation")
     assert ava_obs.area_id == area.id
+    assert ava_obs.details == {"next_steps": "Counting to ten"}
     assert len(events_of(school.leon, "observation")) == 1
 
 

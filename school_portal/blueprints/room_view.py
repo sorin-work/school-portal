@@ -227,6 +227,7 @@ def observe(room_id: int):
         ids = {int(v) for v in request.form.getlist("child_ids") if v.isdigit()}
         chosen = [c for c in children if c.id in ids]
         note = (request.form.get("note") or "").strip()
+        next_steps = (request.form.get("next_steps") or "").strip()
         area_id = request.form.get("area_id", type=int)
         if area_id and area_id not in {a.id for a in areas}:
             area_id = None
@@ -237,7 +238,7 @@ def observe(room_id: int):
         if not errors:
             batch = uuid.uuid4().hex
             when = when_from_form()
-            details = {}
+            details = {"next_steps": next_steps} if next_steps else {}
             for child in chosen:
                 event = log_event(
                     child,
