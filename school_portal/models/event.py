@@ -64,6 +64,9 @@ class Event(db.Model):
     created_by = relationship("User", foreign_keys=[created_by_id])
     updated_by = relationship("User", foreign_keys=[updated_by_id])
     area = relationship("CurriculumArea")
+    photos: Mapped[list["EventMedia"]] = relationship(
+        back_populates="event", cascade="all, delete-orphan"
+    )
 
     @property
     def label(self) -> str:
@@ -118,3 +121,17 @@ class CurriculumArea(db.Model):
     code: Mapped[str] = mapped_column(String(20), unique=True)
     name: Mapped[str] = mapped_column(String(120))
     sort_order: Mapped[int] = mapped_column(default=0)
+
+
+class EventMedia(db.Model):
+    __tablename__ = "event_media"
+
+    event_id: Mapped[int] = mapped_column(
+        ForeignKey("events.id", ondelete="CASCADE"), primary_key=True
+    )
+    media_id: Mapped[str] = mapped_column(
+        ForeignKey("media.id", ondelete="CASCADE"), primary_key=True
+    )
+
+    event: Mapped[Event] = relationship(back_populates="photos")
+    media = relationship("Media")
