@@ -23,7 +23,11 @@ PostgreSQL for everything, including the small job queue the worker runs.
   different amount for the child who left half).
 - **Learning observations** for one or more children, linked to an area of
   the EYFS (or any framework the school adds), with next steps.
+  Up to four photos can go with each one.
 - **Visibility.** Every diary entry is for the family or for staff only.
+- **Uploads** are checked by what is in the file (JPEG, PNG or WebP), limited
+  in size, decoded and written again so EXIF (GPS position, camera details)
+  is stripped, and served only through a route that checks who is asking.
 
 ## Quick start
 
@@ -85,6 +89,8 @@ development; `.env.example` lists them.
 | `SCHOOL_TIMEZONE` | `Europe/London` | Where a day starts and ends |
 | `SEED_DEMO` | `false` | Seed the demo school into an empty database |
 | `SHOW_DEMO_LOGINS` | `false` | List the demo accounts on the sign-in page |
+| `UPLOAD_DIR` | `./uploads` | Where photos are stored |
+| `MAX_UPLOAD_MB` | `8` | Largest photo accepted |
 
 
 ## Development

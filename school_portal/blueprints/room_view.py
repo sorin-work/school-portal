@@ -11,8 +11,9 @@ from .. import access, timeutil
 from ..decorators import staff_required
 from ..events import child_days, log_event
 from ..extensions import db
-from ..models import Child, CurriculumArea, Event, Room
+from ..models import Child, CurriculumArea, Event, EventMedia, Room
 from ..models.event import AMOUNTS, MEALS, MOODS, NAPPY, TOILET
+from ..uploads import UploadError, save_image
 
 bp = Blueprint("room_view", __name__, url_prefix="/rooms")
 
@@ -235,6 +236,15 @@ def observe(room_id: int):
             errors.append("Choose the children the observation is about.")
         if not note:
             errors.append("Describe what you saw.")
+        files = [f for f in request.files.getlist("photos") if f and f.filename]
+        if len(files) > 4:
+            errors.append("Attach at most four photos.")
+        media = []
+        if not errors:
+            try:
+                media = [save_image(f, purpose="photo", user_id=current_user.id) for f in files]
+            except UploadError as exc:
+                errors.append(str(exc))
         if not errors:
             batch = uuid.uuid4().hex
             when = when_from_form()
@@ -251,6 +261,8 @@ def observe(room_id: int):
                     batch=batch,
                 )
                 event.area_id = area_id
+                for item in media:
+                    event.photos.append(EventMedia(media=item))
             db.session.commit()
             flash(f"Observation saved for {len(chosen)} children.", "success")
             return redirect(url_for(".show", room_id=room.id))

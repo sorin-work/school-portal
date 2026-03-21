@@ -7,6 +7,7 @@ from flask_login import current_user, login_required
 
 from .. import access, timeutil
 from ..events import day_events
+from ..models import Event
 
 bp = Blueprint("timeline", __name__)
 
@@ -16,6 +17,14 @@ def visible_events(child, day):
     if current_user.is_staff:
         return events
     return [e for e in events if e.visibility == "parents"]
+
+
+def photos_for(event: Event) -> list:
+    """The photos of an event this user may see."""
+    items = [p.media for p in event.photos]
+    if current_user.is_staff or not items:
+        return items
+    return items
 
 
 @bp.get("/children/<int:child_id>/diary")
@@ -34,5 +43,6 @@ def child_day(child_id: int):
         events=events,
         previous=day - timedelta(days=1),
         following=day + timedelta(days=1) if day < timeutil.today() else None,
+        photos_for=photos_for,
         **context,
     )

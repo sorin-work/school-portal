@@ -30,6 +30,9 @@ services:
       SEED_DEMO: ${SEED_DEMO:-true}
       # Lists the demo accounts on the sign-in page.
       SHOW_DEMO_LOGINS: ${SHOW_DEMO_LOGINS:-true}
+      UPLOAD_DIR: /data/uploads
+    volumes:
+      - uploads:/data/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -44,3 +47,4 @@ services:
 
 volumes:
   db-data:
+  uploads:

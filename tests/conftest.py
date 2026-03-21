@@ -50,6 +50,7 @@ def app(database, tmp_path):
             "SERVER_NAME": "portal.test",
             # A fast hash: the tests make hundreds of accounts.
             "PASSWORD_HASH_METHOD": "pbkdf2:sha256:1000",
+            "UPLOAD_DIR": str(tmp_path / "uploads"),
         }
     )
 

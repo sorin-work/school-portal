@@ -62,6 +62,9 @@ def _register_blueprints(app: Flask) -> None:
     from .blueprints import timeline
 
     app.register_blueprint(timeline.bp)
+    from .blueprints import media
+
+    app.register_blueprint(media.bp)
 
 
 def _register_error_pages(app: Flask) -> None:

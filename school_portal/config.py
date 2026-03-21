@@ -36,6 +36,10 @@ class Config:
         self.WTF_CSRF_TIME_LIMIT = None
         self.SCHOOL_NAME = os.environ.get("SCHOOL_NAME", "School Portal")
         self.SCHOOL_TIMEZONE = os.environ.get("SCHOOL_TIMEZONE", "Europe/London")
+        self.UPLOAD_DIR = os.environ.get("UPLOAD_DIR", os.path.abspath("uploads"))
+        self.MAX_UPLOAD_MB = _int("MAX_UPLOAD_MB", 8)
+        # Leave room for a few photos and the form fields in one request.
+        self.MAX_CONTENT_LENGTH = (self.MAX_UPLOAD_MB * 4 + 1) * 1024 * 1024
         self.TESTING = False
 
     @property

@@ -12,7 +12,17 @@ from PIL import Image, ImageDraw
 
 from . import timeutil
 from .extensions import db
-from .models import Child, Event, Guardian, Role, Room, RoomStaff, User
+from .models import (
+    Child,
+    Event,
+    Guardian,
+    Media,
+    Role,
+    Room,
+    RoomStaff,
+    User,
+)
+from .models.media import new_media_id
 
 PASSWORD = "demo-password"
 
@@ -248,6 +258,35 @@ def seed() -> None:
 
     _seed_days(rng, today, rooms, children, users)
     db.session.commit()
+
+
+def _photo(label: str, seed_value: int, user: User, purpose: str = "photo") -> Media:
+    from .uploads import _write, clean_image
+
+    cleaned = clean_image(placeholder_image(label, seed_value), 20 * 1024 * 1024)
+    media_id = new_media_id()
+    stored = f"{media_id[:2]}/{media_id}.{cleaned.ext}"
+    thumb = f"{media_id[:2]}/{media_id}.thumb.{cleaned.ext}"
+    import os
+
+    from flask import current_app
+
+    os.makedirs(os.path.join(current_app.config["UPLOAD_DIR"], media_id[:2]), exist_ok=True)
+    _write(stored, cleaned.data)
+    _write(thumb, cleaned.thumb)
+    media = Media(
+        id=media_id,
+        purpose=purpose,
+        content_type=cleaned.content_type,
+        size=len(cleaned.data),
+        width=cleaned.width,
+        height=cleaned.height,
+        stored_name=stored,
+        thumb_name=thumb,
+        uploaded_by_id=user.id,
+    )
+    db.session.add(media)
+    return media
 
 
 MENUS = {

@@ -28,6 +28,11 @@
   </div>
   <div><label class="label" for="note">What I saw</label><textarea class="input" id="note" name="note" rows="5">{{ request.form.get("note", "") }}</textarea></div>
   <div><label class="label" for="next_steps">Next steps</label><textarea class="input" id="next_steps" name="next_steps" rows="2">{{ request.form.get("next_steps", "") }}</textarea></div>
+  <div>
+    <label class="label" for="photos">Photos</label>
+    <input class="input" type="file" id="photos" name="photos" accept="image/jpeg,image/png,image/webp" capture="environment" multiple>
+    <p class="hint">Up to four. Location and camera details are removed when they are saved.</p>
+  </div>
   <div class="grid grid-cols-2 gap-3">
     <div><label class="label" for="at">Time</label><input class="input" type="time" id="at" name="at" value="{{ request.form.get('at', '') }}"></div>
     <div>
