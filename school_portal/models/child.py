@@ -5,6 +5,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..extensions import db
 
+PHOTO_CONSENT_CHOICES = [
+    ("none", "No photos shared"),
+    ("own", "Photos shared with this child's own family only"),
+    ("group", "May appear in group photos other families see"),
+]
 ACCESS_CHOICES = [
     ("full", "Full access"),
     ("read_only", "Timeline only (no messages, forms or absence reports)"),
@@ -27,6 +32,7 @@ class Child(db.Model):
     allergies: Mapped[str | None] = mapped_column(Text)
     medical_notes: Mapped[str | None] = mapped_column(Text)
     share_medical_with_parents: Mapped[bool] = mapped_column(default=False)
+    photo_consent: Mapped[str] = mapped_column(String(8), default="none", server_default="none")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
