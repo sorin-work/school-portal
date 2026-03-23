@@ -52,3 +52,9 @@ def test_large_images_are_scaled_down():
     Image.new("RGB", (4000, 1000), (1, 2, 3)).save(out, "JPEG")
     cleaned = clean_image(out.getvalue(), 20 * LIMIT)
     assert (cleaned.width, cleaned.height) == (2048, 512)
+
+
+def test_phone_orientation_is_applied_before_exif_goes():
+    # Orientation 6 means "rotate 90 degrees clockwise to display".
+    cleaned = clean_image(jpeg_with_exif(size=(64, 48), orientation=6), LIMIT)
+    assert (cleaned.width, cleaned.height) == (48, 64)

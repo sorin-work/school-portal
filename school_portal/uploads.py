@@ -12,7 +12,7 @@ import os
 from dataclasses import dataclass
 
 from flask import current_app
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, ImageOps, UnidentifiedImageError
 from werkzeug.datastructures import FileStorage
 
 from .extensions import db
@@ -67,6 +67,8 @@ def clean_image(raw: bytes, limit: int) -> Cleaned:
     except (UnidentifiedImageError, OSError, SyntaxError, Image.DecompressionBombError) as exc:
         raise UploadError("That file is not an image that can be read.") from exc
 
+    # Phones store the camera's orientation in EXIF; apply it before EXIF goes.
+    image = ImageOps.exif_transpose(image)
     content_type, ext = FORMATS[fmt]
     if fmt == "JPEG" and image.mode not in ("RGB", "L"):
         image = image.convert("RGB")
