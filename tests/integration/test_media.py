@@ -24,6 +24,9 @@ def observe(client, room, children, *files, visibility="parents"):
 
 def consent(*children, value="group"):
     """Give the children photo consent, once consent exists."""
+    for child in children:
+        child.photo_consent = value
+    db.session.commit()
 
 
 def only_media():
@@ -90,3 +93,36 @@ def test_signed_out_users_get_nothing(client, school):
     media = only_media()
     client.post("/logout")
     assert client.get(f"/media/{media.id}").status_code == 302
+
+
+def test_group_photo_needs_the_other_childs_group_consent(client, school):
+    from ..conftest import link, make_user
+
+    leon_parent = make_user("parent", email="leonparent@example.com")
+    link(leon_parent, school.leon)
+    consent(school.ava, value="group")
+    consent(school.leon, value="own")
+    login(client, school.amy)
+    observe(client, school.saplings, [school.ava, school.leon], ("pair.jpg", jpeg_with_exif()))
+    media = only_media()
+    client.post("/logout")
+    # Leon's consent is "own", so Ava's family may not see a photo with him in it.
+    login(client, school.sam)
+    assert client.get(f"/media/{media.id}").status_code == 404
+    assert b"/media/" not in client.get(f"/children/{school.ava.id}/diary").data
+    client.post("/logout")
+    # Ava allows group photos, so Leon's family may.
+    login(client, leon_parent)
+    assert client.get(f"/media/{media.id}").status_code == 200
+    client.post("/logout")
+    consent(school.leon, value="group")
+    login(client, school.sam)
+    assert client.get(f"/media/{media.id}").status_code == 200
+
+
+def test_photos_are_refused_for_a_child_without_consent(client, school):
+    consent(school.ava, value="none")
+    login(client, school.amy)
+    response = observe(client, school.saplings, [school.ava], ("tower.jpg", jpeg_with_exif()))
+    assert b"No photo consent for Ava R." in response.data
+    assert db.session.scalars(select(Media)).all() == []

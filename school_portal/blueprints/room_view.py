@@ -239,6 +239,13 @@ def observe(room_id: int):
         files = [f for f in request.files.getlist("photos") if f and f.filename]
         if len(files) > 4:
             errors.append("Attach at most four photos.")
+        if files:
+            refused = [c.short_name for c in chosen if c.photo_consent == "none"]
+            if refused:
+                errors.append(
+                    "No photo consent for " + ", ".join(refused) + ". Leave them out of the "
+                    "photo, or save the observation without photos."
+                )
         media = []
         if not errors:
             try:

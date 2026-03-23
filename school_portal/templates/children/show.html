@@ -22,6 +22,7 @@
       <div><dt class="font-medium">Medical notes{% if current_user.is_staff and not child.share_medical_with_parents %} <span class="badge badge-slate">Staff only</span>{% endif %}</dt><dd class="whitespace-pre-line">{{ child.medical_notes or "None recorded" }}</dd></div>
       {% endif %}
       <div><dt class="font-medium">Born</dt><dd>{{ child.date_of_birth|date }}</dd></div>
+      <div><dt class="font-medium">Photo consent</dt><dd>{{ {"none": "No photos shared", "own": "Own family only", "group": "Group photos allowed"}[child.photo_consent] }}</dd></div>
     </dl>
   </section>
   {% if guardians %}

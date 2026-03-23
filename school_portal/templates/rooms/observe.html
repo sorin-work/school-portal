@@ -15,6 +15,7 @@
       {% for child in children %}
       <label class="flex items-center gap-2">
         <input type="checkbox" name="child_ids" value="{{ child.id }}" {% if child.id|string in chosen %}checked{% endif %}> {{ child.short_name }}
+        {% if child.photo_consent == "none" %}<span class="badge badge-slate">No photos</span>{% endif %}
       </label>
       {% endfor %}
     </div>

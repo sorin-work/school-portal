@@ -202,6 +202,7 @@ def seed() -> None:
             start_date=months_ago(today, min(age - 6, 20)) if age > 8 else months_ago(today, 2),
             allergies=allergies,
             dietary_needs=diet,
+            photo_consent=consent,
         )
         db.session.add(child)
         children[first] = child

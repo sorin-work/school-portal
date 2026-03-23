@@ -5,7 +5,7 @@ from datetime import timedelta
 from flask import Blueprint, render_template, request
 from flask_login import current_user, login_required
 
-from .. import access, timeutil
+from .. import access, photos, timeutil
 from ..events import day_events
 from ..models import Event
 
@@ -24,7 +24,12 @@ def photos_for(event: Event) -> list:
     items = [p.media for p in event.photos]
     if current_user.is_staff or not items:
         return items
-    return items
+    shown = []
+    for media in items:
+        tagged = photos.children_in(media.id)
+        if photos.visible_to_family_of(event.child, tagged):
+            shown.append(media)
+    return shown
 
 
 @bp.get("/children/<int:child_id>/diary")

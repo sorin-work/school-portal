@@ -6,7 +6,7 @@ from wtforms.validators import DataRequired, Email, Length, Optional
 
 from ..decorators import admin_required
 from ..extensions import db
-from ..models import ACCESS_CHOICES, Child, Guardian, Role, Room, User
+from ..models import ACCESS_CHOICES, PHOTO_CONSENT_CHOICES, Child, Guardian, Role, Room, User
 
 bp = Blueprint("admin_children", __name__, url_prefix="/admin/children")
 
@@ -23,6 +23,7 @@ class ChildForm(FlaskForm):
     allergies = TextAreaField("Allergies", validators=[Optional(), Length(max=2000)])
     medical_notes = TextAreaField("Medical notes", validators=[Optional(), Length(max=4000)])
     share_medical_with_parents = BooleanField("Show the medical notes to the family")
+    photo_consent = SelectField("Photo consent", choices=PHOTO_CONSENT_CHOICES, default="none")
 
 
 class GuardianForm(FlaskForm):
@@ -97,6 +98,7 @@ def _apply(form: ChildForm, child: Child) -> list[str]:
         "allergies",
         "medical_notes",
         "share_medical_with_parents",
+        "photo_consent",
     ):
         value = getattr(form, name).data
         if isinstance(value, str):

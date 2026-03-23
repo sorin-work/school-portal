@@ -4,7 +4,7 @@ from flask import Blueprint, abort, send_file
 from flask_login import current_user, login_required
 from sqlalchemy import select
 
-from .. import access, uploads
+from .. import access, photos, uploads
 from ..extensions import db
 from ..models import Child, Event, EventMedia, Media
 
@@ -20,10 +20,12 @@ def may_see(media: Media) -> bool:
     ).all()
     if current_user.is_staff:
         return any(access.can_view_child(current_user, child) for _, child in rows)
+    tagged = list({child.id: child for _, child in rows}.values())
     for event, child in rows:
         if event.visibility != "parents" or not access.can_view_child(current_user, child):
             continue
-        return True
+        if photos.visible_to_family_of(child, tagged):
+            return True
     return False
 
 

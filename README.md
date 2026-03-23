@@ -25,6 +25,10 @@ PostgreSQL for everything, including the small job queue the worker runs.
   the EYFS (or any framework the school adds), with next steps.
   Up to four photos can go with each one.
 - **Visibility.** Every diary entry is for the family or for staff only.
+- **Photo consent per child**: no photos, own family only, or group photos.
+  A photo with several children is shown to a family only when every other
+  child in it has group consent. Staff cannot attach photos to a child with
+  no consent.
 - **Uploads** are checked by what is in the file (JPEG, PNG or WebP), limited
   in size, decoded and written again so EXIF (GPS position, camera details)
   is stripped, and served only through a route that checks who is asking.
