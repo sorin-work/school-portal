@@ -34,6 +34,7 @@ def children_in(media_id: str) -> list[Child]:
         .where(EventMedia.media_id == media_id)
         .distinct()
     )
+    query = query.where(Event.deleted_at.is_(None))
     return list(db.session.scalars(query))
 
 

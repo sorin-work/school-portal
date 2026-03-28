@@ -126,3 +126,20 @@ def test_photos_are_refused_for_a_child_without_consent(client, school):
     response = observe(client, school.saplings, [school.ava], ("tower.jpg", jpeg_with_exif()))
     assert b"No photo consent for Ava R." in response.data
     assert db.session.scalars(select(Media)).all() == []
+
+
+def test_a_removed_event_no_longer_counts_its_child_in_the_photo(client, school):
+    from school_portal import photos, timeutil
+
+    consent(school.ava, value="group")
+    consent(school.leon, value="own")
+    login(client, school.amy)
+    observe(client, school.saplings, [school.ava, school.leon], ("pair.jpg", jpeg_with_exif()))
+    media = only_media()
+    leon_event = db.session.scalar(select(Event).where(Event.child_id == school.leon.id))
+    leon_event.deleted_at = timeutil.now()
+    db.session.commit()
+    assert [c.id for c in photos.children_in(media.id)] == [school.ava.id]
+    client.post("/logout")
+    login(client, school.sam)
+    assert b"/media/" in client.get(f"/children/{school.ava.id}/diary").data
