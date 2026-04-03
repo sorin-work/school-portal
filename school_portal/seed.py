@@ -14,7 +14,9 @@ from . import timeutil
 from .extensions import db
 from .models import (
     Child,
+    CurriculumArea,
     Event,
+    EventMedia,
     Guardian,
     Media,
     Role,
@@ -257,7 +259,15 @@ def seed() -> None:
         db.session.add(Guardian(child=children[first], user=user, relationship_label="Parent"))
     db.session.flush()
 
+    areas = []
+    for order, (code, name) in enumerate(EYFS):
+        area = CurriculumArea(framework="EYFS", code=code, name=name, sort_order=order)
+        db.session.add(area)
+        areas.append(area)
+    db.session.flush()
+
     _seed_days(rng, today, rooms, children, users)
+    _seed_observations(today, rooms, children, users, areas)
     db.session.commit()
 
 
@@ -416,3 +426,81 @@ def _seed_days(rng, today, rooms, children, users) -> None:
                     created_by_id=users["tom.staff@example.com"].id,
                 )
             )
+
+
+def _seed_observations(today, rooms, children, users, areas) -> None:
+    yesterday = school_days(today, 2)[0]
+    by_code = {a.code: a for a in areas}
+    items = [
+        # children, room, area code, note, next steps, photo label (None for no photo)
+        (
+            ["Ava", "Leon"],
+            "Saplings",
+            "EYFS-PSED",
+            "Ava and Leon took turns pouring water between the jugs and counted the pours together.",
+            "More turn-taking games with a timer.",
+            "Water play",
+        ),
+        (
+            ["Esme"],
+            "Saplings",
+            "EYFS-CL",
+            "Esme told the group about her weekend using sentences of four or five words.",
+            "Encourage her to ask questions at story time.",
+            None,
+        ),
+        (
+            ["Freya", "Ollie", "Kit"],
+            "Oaks",
+            "EYFS-UW",
+            "Planted cress in eggshells, talked about what seeds need to grow.",
+            "Check the cress on Monday and measure it.",
+            "Cress planting",
+        ),
+        (
+            ["Noah"],
+            "Class R",
+            "EYFS-L",
+            "Noah read a decodable book aloud and blended sh words without help.",
+            "Move to the next phonics book band.",
+            "Reading corner",
+        ),
+        (
+            ["Mila"],
+            "Acorns",
+            "EYFS-PD",
+            "Mila pulled herself up on the low shelf and took three steps along it.",
+            "Push-along toys in the garden.",
+            "Cruising along the shelf",
+        ),
+        (
+            ["Zara", "Freya"],
+            "Oaks",
+            "EYFS-EAD",
+            "Zara and Freya made a shop sign and priced the fruit at 1p and 2p.",
+            None,
+            "Role play shop",
+        ),
+    ]
+    for index, (names, room_name, code, note, steps, label) in enumerate(items):
+        day = yesterday if index % 2 == 0 else today
+        when = timeutil.at(day, time(10, 30 + index * 4))
+        if when > timeutil.now():
+            when = timeutil.at(yesterday, time(10, 30 + index * 4))
+        by = rooms[room_name].leads[0] if rooms[room_name].staff else users["demo@example.com"]
+        media = _photo(label, 100 + index, by) if label else None
+        for name in names:
+            event = Event(
+                child_id=children[name].id,
+                room_id=rooms[room_name].id,
+                kind="observation",
+                occurred_at=when,
+                note=note,
+                details={"next_steps": steps} if steps else {},
+                visibility="parents",
+                area_id=by_code[code].id,
+                created_by_id=by.id,
+            )
+            if media is not None:
+                event.photos.append(EventMedia(media=media))
+            db.session.add(event)
