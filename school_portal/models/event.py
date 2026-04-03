@@ -15,11 +15,15 @@ KINDS = {
     "toilet": ("Toilet", "stone"),
     "mood": ("Mood", "pink"),
     "observation": ("Learning", "emerald"),
+    "incident": ("Incident", "orange"),
+    "accident": ("Accident", "red"),
     "note": ("Note", "slate"),
 }
 
 # Kinds that only make sense in nursery rooms.
 NURSERY_ONLY = {"nap", "nappy"}
+# Kinds a parent has to acknowledge, always visible to parents.
+NEEDS_ACK = {"incident", "accident"}
 
 MEALS = ["breakfast", "snack", "lunch", "tea"]
 AMOUNTS = [("all", "All of it"), ("most", "Most"), ("some", "Some"), ("none", "None")]
@@ -53,6 +57,11 @@ class Event(db.Model):
     area_id: Mapped[int | None] = mapped_column(
         ForeignKey("curriculum_areas.id", ondelete="SET NULL")
     )
+    needs_ack: Mapped[bool] = mapped_column(default=False, server_default="false")
+    acknowledged_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    acknowledged_by_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
     created_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
@@ -64,6 +73,7 @@ class Event(db.Model):
     created_by = relationship("User", foreign_keys=[created_by_id])
     updated_by = relationship("User", foreign_keys=[updated_by_id])
     area = relationship("CurriculumArea")
+    acknowledged_by = relationship("User", foreign_keys=[acknowledged_by_id])
     photos: Mapped[list["EventMedia"]] = relationship(
         back_populates="event", cascade="all, delete-orphan"
     )
