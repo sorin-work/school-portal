@@ -277,3 +277,43 @@ def observe(room_id: int):
     return render_template(
         "rooms/observe.html", room=room, children=children, areas=areas, errors=errors
     )
+
+
+@bp.route("/<int:room_id>/incident", methods=["GET", "POST"])
+@staff_required
+def incident(room_id: int):
+    """An incident or an accident. Parents always see it and have to acknowledge it."""
+    room = room_or_404(room_id)
+    children = room_children(room)
+    errors: list[str] = []
+    form = request.form
+    if request.method == "POST":
+        child_id = form.get("child_id", type=int)
+        child = next((c for c in children if c.id == child_id), None)
+        kind = form.get("kind")
+        what = (form.get("what") or "").strip()
+        action = (form.get("action_taken") or "").strip()
+        if child is None:
+            errors.append("Choose the child.")
+        if kind not in ("incident", "accident"):
+            errors.append("Choose incident or accident.")
+        if not what:
+            errors.append("Say what happened.")
+        if not action:
+            errors.append("Say what was done about it.")
+        if not errors:
+            details = {
+                "what": what,
+                "action_taken": action,
+                "injury": (form.get("injury") or "").strip(),
+                "witness": (form.get("witness") or "").strip(),
+            }
+            event = log_event(child, room, kind, when_from_form(), details, what, "parents")
+            event.needs_ack = True
+            db.session.flush()
+            db.session.commit()
+            flash(
+                f"{event.label} recorded. The family has been asked to acknowledge it.", "success"
+            )
+            return redirect(url_for(".show", room_id=room.id))
+    return render_template("rooms/incident.html", room=room, children=children, errors=errors)

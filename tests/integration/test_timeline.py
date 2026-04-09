@@ -59,3 +59,27 @@ def test_another_day(client, school):
     assert b"Walk to the park" not in client.get(f"/children/{school.ava.id}/diary").data
     page = client.get(f"/children/{school.ava.id}/diary?day={yesterday.isoformat()}")
     assert b"Walk to the park" in page.data
+
+
+def test_parent_acknowledges_an_accident(client, school):
+    report = add_event(
+        school.ava,
+        kind="accident",
+        details={"what": "Grazed knee", "action_taken": "Plaster"},
+        note="Grazed knee",
+        needs_ack=True,
+    )
+    login(client, school.sam)
+    assert b"I have read this" in client.get(f"/children/{school.ava.id}/diary").data
+    client.post(f"/events/{report.id}/acknowledge")
+    db.session.refresh(report)
+    assert report.acknowledged_by_id == school.sam.id
+    assert b"Acknowledged by Sam Reid" in client.get(f"/children/{school.ava.id}/diary").data
+
+
+def test_other_parents_cannot_acknowledge(client, school):
+    report = add_event(school.ava, kind="accident", details={}, note="Bump", needs_ack=True)
+    login(client, school.pat)
+    assert client.post(f"/events/{report.id}/acknowledge").status_code == 404
+    db.session.refresh(report)
+    assert report.acknowledged_at is None

@@ -2,11 +2,12 @@
 
 from datetime import timedelta
 
-from flask import Blueprint, render_template, request
+from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from .. import access, photos, timeutil
 from ..events import day_events
+from ..extensions import db
 from ..models import Event
 
 bp = Blueprint("timeline", __name__)
@@ -50,4 +51,22 @@ def child_day(child_id: int):
         following=day + timedelta(days=1) if day < timeutil.today() else None,
         photos_for=photos_for,
         **context,
+    )
+
+
+@bp.post("/events/<int:event_id>/acknowledge")
+@login_required
+def acknowledge(event_id: int):
+    event = db.session.get(Event, event_id)
+    if event is None or event.deleted_at is not None or not event.needs_ack:
+        abort(404)
+    child = access.child_or_404(event.child_id)
+    if event.acknowledged_at is None:
+        event.acknowledged_at = timeutil.now()
+        event.acknowledged_by_id = current_user.id
+        db.session.commit()
+        flash("Thank you, the staff can see that you have read it.", "success")
+    return redirect(
+        url_for("timeline.child_day", child_id=child.id, day=timeutil.fmt_isoday(event.occurred_at))
+        + f"#event-{event.id}"
     )

@@ -142,3 +142,32 @@ def test_an_observation_needs_children_and_a_note(client, school):
     response = client.post(f"/rooms/{school.saplings.id}/observe", data={"note": ""})
     assert b"Choose the children" in response.data
     assert b"Describe what you saw" in response.data
+
+
+def test_an_accident_report_asks_the_family(client, school):
+    login(client, school.amy)
+    response = client.post(
+        f"/rooms/{school.saplings.id}/incident",
+        data={
+            "child_id": str(school.ava.id),
+            "kind": "accident",
+            "what": "Bumped her head on the table",
+            "action_taken": "Cold compress",
+            "visibility": "staff",
+        },
+    )
+    assert response.status_code == 302
+    (report,) = events_of(school.ava, "accident")
+    assert report.needs_ack
+    # Reports are always for the family, whatever the form says.
+    assert report.visibility == "parents"
+
+
+def test_an_incident_report_needs_what_was_done(client, school):
+    login(client, school.amy)
+    response = client.post(
+        f"/rooms/{school.saplings.id}/incident",
+        data={"child_id": str(school.ava.id), "kind": "incident", "what": "Pushed a friend"},
+    )
+    assert b"Say what was done" in response.data
+    assert events_of(school.ava) == []

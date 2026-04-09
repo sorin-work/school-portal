@@ -24,6 +24,9 @@ PostgreSQL for everything, including the small job queue the worker runs.
 - **Learning observations** for one or more children, linked to an area of
   the EYFS (or any framework the school adds), with next steps.
   Up to four photos can go with each one.
+- **Incidents and accidents.** A report with what happened, any injury, what
+  was done and who saw it. The family always sees it, is notified and is
+  asked to acknowledge it; staff see which reports are still waiting.
 - **Visibility.** Every diary entry is for the family or for staff only.
 - **Photo consent per child**: no photos, own family only, or group photos.
   A photo with several children is shown to a family only when every other
