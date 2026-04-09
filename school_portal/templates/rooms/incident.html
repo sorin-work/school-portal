@@ -2,7 +2,7 @@
 {% block title %}Incident or accident · {{ room.name }}{% endblock %}
 {% block content %}
 <h1 class="page-title">Incident or accident, {{ room.name }}</h1>
-<p class="mb-4 max-w-3xl text-sm text-stone-600">The family always sees this report and is asked to acknowledge it.</p>
+<p class="mb-4 max-w-3xl text-sm text-stone-600">The family always sees this report and is asked to acknowledge it. Anything that needs a safeguarding referral goes to the designated safeguarding lead, not here.</p>
 {% for error in errors %}<div class="flash flash-error">{{ error }}</div>{% endfor %}
 <form method="post" class="card max-w-3xl space-y-4">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
