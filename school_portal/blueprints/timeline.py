@@ -9,6 +9,7 @@ from .. import access, photos, timeutil
 from ..events import day_events
 from ..extensions import db
 from ..models import Event
+from ..models.event import MOODS
 
 bp = Blueprint("timeline", __name__)
 
@@ -69,4 +70,68 @@ def acknowledge(event_id: int):
     return redirect(
         url_for("timeline.child_day", child_id=child.id, day=timeutil.fmt_isoday(event.occurred_at))
         + f"#event-{event.id}"
+    )
+
+
+@bp.route("/events/<int:event_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_event(event_id: int):
+    if not current_user.is_staff:
+        abort(404)
+    event = db.session.get(Event, event_id)
+    if event is None or event.deleted_at is not None:
+        abort(404)
+    child = access.child_or_404(event.child_id)
+    back = url_for(
+        "timeline.child_day", child_id=child.id, day=timeutil.fmt_isoday(event.occurred_at)
+    )
+    errors = []
+    if request.method == "POST":
+        note = (request.form.get("note") or "").strip() or None
+        clock = timeutil.parse_clock(request.form.get("at"))
+        visibility = "staff" if request.form.get("visibility") == "staff" else "parents"
+        if event.needs_ack:
+            visibility = "parents"
+        if clock is not None:
+            day = timeutil.local(event.occurred_at).date()
+            event.occurred_at = timeutil.at(day, clock)
+        if event.kind == "mood" and request.form.get("mood") in dict(MOODS):
+            event.details = {**event.details, "mood": request.form["mood"]}
+        if event.kind == "nap":
+            end = timeutil.parse_clock(request.form.get("ended"))
+            if end is not None:
+                ended = timeutil.at(timeutil.local(event.occurred_at).date(), end)
+                if ended <= event.occurred_at:
+                    errors.append("The nap has to end after it started.")
+                else:
+                    event.ended_at = ended
+        if not errors:
+            event.note = note
+            event.visibility = visibility
+            event.updated_at = timeutil.now()
+            event.updated_by_id = current_user.id
+            db.session.commit()
+            flash("Saved.", "success")
+            return redirect(back)
+        db.session.rollback()
+    return render_template(
+        "timeline/edit.html", event=event, child=child, back=back, moods=MOODS, errors=errors
+    )
+
+
+@bp.post("/events/<int:event_id>/delete")
+@login_required
+def delete_event(event_id: int):
+    if not current_user.is_staff:
+        abort(404)
+    event = db.session.get(Event, event_id)
+    if event is None or event.deleted_at is not None:
+        abort(404)
+    child = access.child_or_404(event.child_id)
+    event.deleted_at = timeutil.now()
+    event.updated_by_id = current_user.id
+    db.session.commit()
+    flash("Removed from the diary.", "success")
+    return redirect(
+        url_for("timeline.child_day", child_id=child.id, day=timeutil.fmt_isoday(event.occurred_at))
     )

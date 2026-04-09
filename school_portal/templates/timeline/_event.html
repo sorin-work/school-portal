@@ -37,6 +37,7 @@
   {% if current_user.is_staff %}
   <p class="mt-2 text-xs text-stone-500">
     By {{ event.created_by.name if event.created_by else "someone" }}{% if event.updated_at %}, changed by {{ event.updated_by.name if event.updated_by else "someone" }} at {{ event.updated_at|time }}{% endif %}
+    · <a class="link" href="{{ url_for('timeline.edit_event', event_id=event.id) }}">Edit</a>
   </p>
   {% endif %}
 </li>

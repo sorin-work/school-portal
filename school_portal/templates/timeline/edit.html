@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Edit · {{ child.display_name }}{% endblock %}
+{% block content %}
+<h1 class="page-title">{{ event.label }} for {{ child.display_name }}</h1>
+{% for error in errors %}<div class="flash flash-error">{{ error }}</div>{% endfor %}
+<form method="post" class="card max-w-xl space-y-4">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <p class="text-sm">{{ event.summary() }}</p>
+  <div class="grid grid-cols-2 gap-3">
+    <div><label class="label" for="at">{% if event.kind == "nap" %}Fell asleep{% else %}Time{% endif %}</label><input class="input" type="time" id="at" name="at" value="{{ event.occurred_at|time }}"></div>
+    {% if event.kind == "nap" %}
+    <div><label class="label" for="ended">Woke up</label><input class="input" type="time" id="ended" name="ended" value="{{ event.ended_at|time }}"></div>
+    {% endif %}
+    {% if event.kind == "mood" %}
+    <div>
+      <label class="label" for="mood">Mood</label>
+      <select class="input" id="mood" name="mood">{% for value, label in moods %}<option value="{{ value }}" {% if event.details.get('mood') == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+    </div>
+    {% endif %}
+  </div>
+  <div><label class="label" for="note">Note</label><textarea class="input" id="note" name="note" rows="4">{{ event.note or "" }}</textarea></div>
+  {% if not event.needs_ack %}
+  <div>
+    <label class="label" for="visibility">Who sees it</label>
+    <select class="input" id="visibility" name="visibility"><option value="parents">Families</option><option value="staff" {% if event.staff_only %}selected{% endif %}>Staff only</option></select>
+  </div>
+  {% endif %}
+  <div class="flex flex-wrap gap-2">
+    <button class="btn btn-primary" type="submit">Save</button>
+    <a class="btn btn-secondary" href="{{ back }}">Cancel</a>
+  </div>
+</form>
+<form method="post" action="{{ url_for('timeline.delete_event', event_id=event.id) }}" class="mt-4" data-confirm="Remove this from the diary?">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button class="btn btn-danger" type="submit">Remove from the diary</button>
+</form>
+{% endblock %}

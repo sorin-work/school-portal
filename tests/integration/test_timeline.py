@@ -83,3 +83,25 @@ def test_other_parents_cannot_acknowledge(client, school):
     assert client.post(f"/events/{report.id}/acknowledge").status_code == 404
     db.session.refresh(report)
     assert report.acknowledged_at is None
+
+
+def test_staff_edit_and_remove_an_event(client, school):
+    event = add_event(school.ava, kind="note", details={}, note="Typo")
+    login(client, school.amy)
+    client.post(f"/events/{event.id}/edit", data={"note": "Fixed", "visibility": "staff"})
+    db.session.refresh(event)
+    assert (event.note, event.visibility, event.updated_by_id) == ("Fixed", "staff", school.amy.id)
+    client.post(f"/events/{event.id}/delete")
+    db.session.refresh(event)
+    assert event.deleted_at is not None
+
+
+def test_parents_and_other_rooms_cannot_edit(client, school):
+    event = add_event(school.ava, kind="note", details={}, note="Original")
+    login(client, school.sam)
+    assert client.post(f"/events/{event.id}/edit", data={"note": "x"}).status_code == 404
+    client.post("/logout")
+    login(client, school.ben)
+    assert client.post(f"/events/{event.id}/delete").status_code == 404
+    db.session.refresh(event)
+    assert event.note == "Original" and event.deleted_at is None
