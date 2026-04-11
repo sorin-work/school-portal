@@ -268,6 +268,7 @@ def seed() -> None:
 
     _seed_days(rng, today, rooms, children, users)
     _seed_observations(today, rooms, children, users, areas)
+    _seed_incidents(today, rooms, children, users)
     db.session.commit()
 
 
@@ -504,3 +505,47 @@ def _seed_observations(today, rooms, children, users, areas) -> None:
             if media is not None:
                 event.photos.append(EventMedia(media=media))
             db.session.add(event)
+
+
+def _seed_incidents(today, rooms, children, users) -> None:
+    days = school_days(today, 3)
+    old = Event(
+        child_id=children["Leon"].id,
+        room_id=rooms["Saplings"].id,
+        kind="accident",
+        occurred_at=timeutil.at(days[0], time(14, 10)),
+        note="Tripped on the edge of the rug and bumped his forehead on the table.",
+        details={
+            "what": "Tripped on the edge of the rug and bumped his forehead on the table.",
+            "injury": "Small red mark above the right eyebrow, no swelling",
+            "action_taken": "Cold compress for ten minutes, watched for the rest of the afternoon.",
+            "witness": "Amira Hassan",
+        },
+        visibility="parents",
+        needs_ack=True,
+        acknowledged_at=timeutil.at(days[0], time(17, 5)),
+        acknowledged_by_id=children["Leon"].guardians[0].user_id,
+        created_by_id=users["amira.lead@example.com"].id,
+    )
+    db.session.add(old)
+    when = timeutil.at(days[-1], time(10, 50))
+    if when > timeutil.now():
+        when = timeutil.at(days[-2], time(10, 50))
+    db.session.add(
+        Event(
+            child_id=children["Ava"].id,
+            room_id=rooms["Saplings"].id,
+            kind="accident",
+            occurred_at=when,
+            note="Slipped on the wet patio during water play and grazed her knee.",
+            details={
+                "what": "Slipped on the wet patio during water play and grazed her knee.",
+                "injury": "Graze on the left knee",
+                "action_taken": "Cleaned with water and a wipe, plaster on. Back to playing after a cuddle.",
+                "witness": "Leo Marsh",
+            },
+            visibility="parents",
+            needs_ack=True,
+            created_by_id=users["amira.lead@example.com"].id,
+        )
+    )
