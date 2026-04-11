@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template
 from flask_login import current_user, login_required
-from sqlalchemy import func
+from sqlalchemy import func, select
 
 from .. import access
 from ..extensions import db
-from ..models import Child
+from ..models import Child, Event
 
 bp = Blueprint("dashboard", __name__)
 
@@ -30,10 +30,40 @@ def _staff_context() -> dict:
         ).all()
     )
     context["sizes"] = sizes
+    scope = access.children_query(current_user).with_only_columns(Child.id).order_by(None)
+    context["awaiting_ack"] = list(
+        db.session.scalars(
+            select(Event)
+            .where(
+                Event.child_id.in_(scope),
+                Event.needs_ack,
+                Event.acknowledged_at.is_(None),
+                Event.deleted_at.is_(None),
+            )
+            .order_by(Event.occurred_at.desc())
+            .limit(20)
+        )
+    )
     return context
 
 
 def _parent_context() -> dict:
     children = list(db.session.scalars(access.children_query(current_user, include_left=True)))
     context: dict = {"children": children}
+    ids = [c.id for c in children]
+    context["awaiting_ack"] = (
+        list(
+            db.session.scalars(
+                select(Event).where(
+                    Event.child_id.in_(ids),
+                    Event.needs_ack,
+                    Event.acknowledged_at.is_(None),
+                    Event.deleted_at.is_(None),
+                    Event.visibility == "parents",
+                )
+            )
+        )
+        if ids
+        else []
+    )
     return context

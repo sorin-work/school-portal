@@ -1,6 +1,19 @@
 {% extends "base.html" %}
 {% block content %}
 <h1 class="page-title">Hello, {{ current_user.first_name }}</h1>
+{% if awaiting_ack %}
+<section class="card mb-6 border-orange-300 bg-orange-50">
+  <h2 class="section-title">Please read and acknowledge</h2>
+  <ul class="space-y-2 text-sm">
+    {% for event in awaiting_ack %}
+    <li>
+      <span class="badge badge-{{ event.colour }}">{{ event.label }}</span>
+      <a class="link" href="{{ url_for('timeline.child_day', child_id=event.child_id, day=event.occurred_at|isoday) }}#event-{{ event.id }}">{{ event.child.display_name }}, {{ event.occurred_at|datetime }}</a>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
 <section class="mb-6">
   <h2 class="section-title">Your children</h2>
   {% if children %}
