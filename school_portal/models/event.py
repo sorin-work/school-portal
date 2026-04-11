@@ -42,6 +42,10 @@ class Event(db.Model):
     """One thing that happened to one child: a meal, a nap, an observation."""
 
     __tablename__ = "events"
+    __table_args__ = (
+        db.Index("ix_events_child_occurred", "child_id", "occurred_at"),
+        db.Index("ix_events_room_occurred", "room_id", "occurred_at"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     child_id: Mapped[int] = mapped_column(ForeignKey("children.id", ondelete="CASCADE"))
