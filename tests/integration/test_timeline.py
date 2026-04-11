@@ -85,6 +85,12 @@ def test_other_parents_cannot_acknowledge(client, school):
     assert report.acknowledged_at is None
 
 
+def test_staff_cannot_acknowledge_for_the_family(client, school):
+    report = add_event(school.ava, kind="accident", details={}, note="Bump", needs_ack=True)
+    login(client, school.amy)
+    assert client.post(f"/events/{report.id}/acknowledge").status_code == 403
+
+
 def test_staff_edit_and_remove_an_event(client, school):
     event = add_event(school.ava, kind="note", details={}, note="Typo")
     login(client, school.amy)

@@ -62,6 +62,9 @@ def acknowledge(event_id: int):
     if event is None or event.deleted_at is not None or not event.needs_ack:
         abort(404)
     child = access.child_or_404(event.child_id)
+    if current_user.is_staff:
+        # Staff cannot acknowledge on a family's behalf.
+        abort(403)
     if event.acknowledged_at is None:
         event.acknowledged_at = timeutil.now()
         event.acknowledged_by_id = current_user.id
