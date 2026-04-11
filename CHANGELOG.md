@@ -2,6 +2,15 @@
 
 All notable changes, newest first. Dates are when the version was tagged.
 
+## 0.3.0 (2026-04-11)
+
+- Photos on learning observations, checked by type and size, with EXIF
+  stripped and served only to people allowed to see them
+- Photo consent per child and the group photo rule
+- Incident and accident reports that the family acknowledges
+- Editing and removing diary entries
+- Fix: photos from phones were shown on their side
+
 ## 0.2.0 (2026-03-07)
 
 - The room view for tablets: naps, nappies, toilet, moods and notes per
