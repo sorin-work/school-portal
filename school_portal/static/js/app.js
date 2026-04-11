@@ -1,5 +1,12 @@
 // Small behaviours that would otherwise need inline handlers, which the
 // Content-Security-Policy does not allow.
+document.addEventListener("submit", (event) => {
+  const form = event.target;
+  const question = form.getAttribute("data-confirm");
+  if (question && !window.confirm(question)) {
+    event.preventDefault();
+  }
+});
 
 document.addEventListener("click", (event) => {
   const toggle = event.target.closest("[data-check-all]");
