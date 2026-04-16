@@ -35,6 +35,8 @@ PostgreSQL for everything, including the small job queue the worker runs.
 - **Uploads** are checked by what is in the file (JPEG, PNG or WebP), limited
   in size, decoded and written again so EXIF (GPS position, camera details)
   is stripped, and served only through a route that checks who is asking.
+- **Attendance.** Arrival and going home from the register, with who
+  collected the child.
 
 ## Quick start
 

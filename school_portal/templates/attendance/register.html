@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Register · {{ room.name }}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+  <div>
+    <h1 class="page-title mb-0">Register, {{ room.name }}</h1>
+    <p class="text-sm text-stone-600">{{ today|day }}</p>
+  </div>
+  <a class="btn btn-secondary btn-big" href="{{ url_for('room_view.show', room_id=room.id) }}">Back to the room</a>
+</div>
+<p id="htmx-error" class="flash flash-error" hidden></p>
+<div class="card overflow-x-auto">
+  <table class="table">
+    <thead><tr><th>Child</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for child in children %}
+      {% set day = days[child.id] %}
+      {% include "attendance/_row.html" %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

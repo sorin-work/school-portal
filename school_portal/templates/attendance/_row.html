@@ -1,0 +1,18 @@
+<tr id="row-{{ child.id }}">
+  <td class="font-medium">{{ child.display_name }}</td>
+  <td class="text-sm">
+    {% if day.attendance and day.attendance.checked_out_at %}
+    Went home {{ day.attendance.checked_out_at|time }}{% if day.attendance.collected_by %} with {{ day.attendance.collected_by }}{% endif %}
+    {% elif day.attendance %}
+    In since {{ day.attendance.checked_in_at|time }}
+    {% else %}
+    Not in yet
+    {% endif %}
+  </td>
+  <td class="text-right">
+    {% if day.attendance and not day.attendance.checked_out_at %}
+    {% else %}
+    <button class="btn btn-primary btn-big" hx-post="{{ url_for('attendance.check_in', room_id=room.id, child_id=child.id) }}" hx-target="#row-{{ child.id }}" hx-swap="outerHTML">{% if day.attendance %}Back in{% else %}Arrived{% endif %}</button>
+    {% endif %}
+  </td>
+</tr>

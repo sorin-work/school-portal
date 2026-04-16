@@ -2,9 +2,9 @@ from flask import Blueprint, render_template
 from flask_login import current_user, login_required
 from sqlalchemy import func, select
 
-from .. import access
+from .. import access, timeutil
 from ..extensions import db
-from ..models import Child, Event
+from ..models import Attendance, Child, Event
 
 bp = Blueprint("dashboard", __name__)
 
@@ -21,6 +21,15 @@ def _staff_context() -> dict:
     context: dict = {}
     rooms = access.rooms_for(current_user)
     context["rooms"] = rooms
+    today = timeutil.today()
+    counts = dict(
+        db.session.execute(
+            select(Attendance.room_id, func.count())
+            .where(Attendance.day == today, Attendance.checked_out_at.is_(None))
+            .group_by(Attendance.room_id)
+        ).all()
+    )
+    context["present"] = counts
     sizes = dict(
         db.session.execute(
             access.children_query(current_user)

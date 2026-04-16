@@ -7,7 +7,7 @@ from flask_login import current_user
 from sqlalchemy import select
 
 from .extensions import db
-from .models import Child, Event, Room
+from .models import Attendance, Child, Event, Room
 
 
 def log_event(
@@ -42,6 +42,7 @@ class ChildDay:
 
     events: list[Event] = field(default_factory=list)
     open_nap: Event | None = None
+    attendance: "Attendance | None" = None
 
     @property
     def last(self) -> Event | None:
@@ -52,6 +53,14 @@ class ChildDay:
             if event.kind == kind:
                 return event
         return None
+
+    @property
+    def present(self) -> bool:
+        return self.attendance is not None and self.attendance.checked_out_at is None
+
+    @property
+    def gone_home(self) -> bool:
+        return self.attendance is not None and self.attendance.checked_out_at is not None
 
 
 def day_events(child_ids: list[int], day: date) -> list[Event]:
@@ -83,4 +92,8 @@ def child_days(children: list[Child], day: date) -> dict[int, ChildDay]:
         state.events.append(event)
         if event.kind == "nap" and event.ended_at is None:
             state.open_nap = event
+    for row in db.session.scalars(
+        select(Attendance).where(Attendance.child_id.in_(ids), Attendance.day == day)
+    ):
+        days[row.child_id].attendance = row
     return days
