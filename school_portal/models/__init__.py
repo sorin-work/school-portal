@@ -1,3 +1,4 @@
+from .attendance import Attendance
 from .child import ACCESS_CHOICES, PHOTO_CONSENT_CHOICES, Child, Guardian
 from .event import KINDS, CurriculumArea, Event, EventMedia
 from .media import Media
@@ -8,6 +9,7 @@ __all__ = [
     "ACCESS_CHOICES",
     "KINDS",
     "PHOTO_CONSENT_CHOICES",
+    "Attendance",
     "Child",
     "CurriculumArea",
     "Event",
