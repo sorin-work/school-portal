@@ -1,0 +1,32 @@
+<tr id="row-{{ child.id }}">
+  <td colspan="3">
+    <form hx-post="{{ url_for('attendance.check_out', room_id=room.id, child_id=child.id) }}" hx-target="#row-{{ child.id }}" hx-swap="outerHTML" class="space-y-3">
+      <p class="font-medium">Who is collecting {{ child.display_name }}?</p>
+      {% if error %}<p class="error">{{ error }}</p>{% endif %}
+      {% if collectors %}
+      <div class="flex flex-wrap gap-3">
+        {% for collector in collectors %}
+        <div class="flex items-center gap-2 rounded border border-stone-200 p-2 text-sm">
+          {% if collector.photo_id %}<img class="h-16 w-16 rounded object-cover" src="{{ url_for('media.thumb', media_id=collector.photo_id) }}" alt="Photo of {{ collector.name }}">{% endif %}
+          <span>{{ collector.name }}{% if collector.password_hint %}<br><span class="text-stone-600">Password: {{ collector.password_hint }}</span>{% endif %}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <div class="grid gap-2 sm:grid-cols-2">
+        {% for value, label in choices %}
+        <label class="flex items-center gap-2 text-sm"><input type="radio" name="collector" value="{{ value }}"> {{ label }}</label>
+        {% endfor %}
+        <label class="flex items-center gap-2 text-sm"><input type="radio" name="collector" value="other"> Someone else</label>
+      </div>
+      <div class="grid gap-2 sm:grid-cols-2">
+        <input class="input" name="other" placeholder="Name, if someone else" aria-label="Name of the person collecting">
+        <input class="input" name="note" placeholder="How the family confirmed it" aria-label="Note">
+      </div>
+      <div class="flex gap-2">
+        <button class="btn btn-primary btn-big" type="submit">Went home</button>
+        <a class="btn btn-secondary btn-big" href="{{ url_for('attendance.register', room_id=room.id) }}">Cancel</a>
+      </div>
+    </form>
+  </td>
+</tr>
