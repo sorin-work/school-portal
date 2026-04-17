@@ -1,5 +1,5 @@
 <tr id="row-{{ child.id }}">
-  <td class="font-medium">{{ child.display_name }}</td>
+  <td class="font-medium">{{ child.display_name }}{% if child.has_allergies %} <span class="badge badge-red">Allergy</span>{% endif %}</td>
   <td class="text-sm">
     {% if day.attendance and day.attendance.checked_out_at %}
     Went home {{ day.attendance.checked_out_at|time }}{% if day.attendance.collected_by %} with {{ day.attendance.collected_by }}{% endif %}
