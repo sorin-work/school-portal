@@ -11,6 +11,11 @@
     {% if following %}<a class="btn btn-secondary" href="{{ url_for('timeline.child_day', child_id=child.id, day=following.isoformat()) }}">Next day</a>{% endif %}
   </nav>
 </div>
+{% if attendance %}
+<p class="mb-4 text-sm text-stone-700">
+  Arrived {{ attendance.checked_in_at|time }}{% if attendance.checked_out_at %}, went home {{ attendance.checked_out_at|time }}{% if attendance.collected_by %} with {{ attendance.collected_by }}{% endif %}{% endif %}.
+</p>
+{% endif %}
 <ol class="space-y-3">
   {% for event in events %}
   {% include "timeline/_event.html" %}

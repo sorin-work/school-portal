@@ -4,11 +4,12 @@ from datetime import timedelta
 
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
+from sqlalchemy import select
 
 from .. import access, photos, timeutil
 from ..events import day_events
 from ..extensions import db
-from ..models import Event
+from ..models import Attendance, Event
 from ..models.event import MOODS
 
 bp = Blueprint("timeline", __name__)
@@ -43,6 +44,9 @@ def child_day(child_id: int):
         day = timeutil.today()
     events = visible_events(child, day)
     context = {}
+    context["attendance"] = db.session.scalar(
+        select(Attendance).where(Attendance.child_id == child.id, Attendance.day == day)
+    )
     return render_template(
         "timeline/day.html",
         child=child,

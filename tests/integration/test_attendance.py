@@ -41,3 +41,11 @@ def test_register_lists_the_room(client, school):
     page = client.get(f"/rooms/{school.saplings.id}/register")
     assert b"Ava Reid" in page.data and b"Leon Kowalczyk" in page.data
     assert b"Kit" not in page.data
+
+
+def test_parents_see_arrival_in_the_diary(client, school):
+    login(client, school.amy)
+    client.post(f"/rooms/{school.saplings.id}/children/{school.ava.id}/check-in")
+    client.post("/logout")
+    login(client, school.sam)
+    assert b"Arrived" in client.get(f"/children/{school.ava.id}/diary").data
