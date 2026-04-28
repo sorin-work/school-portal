@@ -37,6 +37,8 @@ PostgreSQL for everything, including the small job queue the worker runs.
   is stripped, and served only through a route that checks who is asking.
 - **Attendance.** Arrival and going home from the register, with who
   collected the child.
+  Authorised collectors have a photo and a collection password that staff
+  see at the door.
 
 ## Quick start
 

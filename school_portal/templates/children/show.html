@@ -39,4 +39,39 @@
   </section>
   {% endif %}
 </div>
+<section id="collectors" class="card mt-6">
+  <h2 class="section-title">Who may collect</h2>
+  <p class="mb-3 text-sm text-stone-600">Parents and carers with access, and these people:</p>
+  <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    {% for collector in collectors %}
+    <li class="flex items-start gap-3 rounded border border-stone-200 p-3">
+      {% if collector.photo_id %}<img class="h-20 w-20 rounded object-cover" src="{{ url_for('media.thumb', media_id=collector.photo_id) }}" alt="Photo of {{ collector.name }}">{% else %}<div class="flex h-20 w-20 items-center justify-center rounded bg-stone-100 text-xs text-stone-500">No photo</div>{% endif %}
+      <div class="text-sm">
+        <p class="font-medium">{{ collector.name }}</p>
+        <p>{{ collector.relationship_label or "" }}{% if collector.phone %}, {{ collector.phone }}{% endif %}</p>
+        {% if current_user.is_staff and collector.password_hint %}<p class="text-stone-600">Password: {{ collector.password_hint }}</p>{% endif %}
+        {% if current_user.is_staff %}
+        <form method="post" action="{{ url_for('children.remove_collector', child_id=child.id, collector_id=collector.id) }}" data-confirm="Remove {{ collector.name }}?">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="link text-red-700" type="submit">Remove</button>
+        </form>
+        {% endif %}
+      </div>
+    </li>
+    {% else %}
+    <li class="text-sm text-stone-600">Nobody else.</li>
+    {% endfor %}
+  </ul>
+  {% if form %}
+  <form method="post" action="{{ url_for('children.add_collector', child_id=child.id) }}" enctype="multipart/form-data" class="mt-4 grid gap-3 sm:grid-cols-2" novalidate>
+    {{ form.hidden_tag() }}
+    {{ field(form.name) }}
+    {{ field(form.relationship) }}
+    {{ field(form.phone) }}
+    {{ field(form.password_hint, hint="A word the collector gives at the door.") }}
+    {{ field(form.photo, hint="JPEG, PNG or WebP.") }}
+    <div class="sm:col-span-2"><button class="btn btn-secondary" type="submit">Add a collector</button></div>
+  </form>
+  {% endif %}
+</section>
 {% endblock %}

@@ -49,3 +49,47 @@ def test_parents_see_arrival_in_the_diary(client, school):
     client.post("/logout")
     login(client, school.sam)
     assert b"Arrived" in client.get(f"/children/{school.ava.id}/diary").data
+
+
+def test_collectors_with_photos(client, school):
+    import io
+
+    from ..images import jpeg_with_exif
+
+    login(client, school.amy)
+    response = client.post(
+        f"/children/{school.ava.id}/collectors",
+        data={
+            "name": "Jo Marlow",
+            "relationship": "Childminder",
+            "password_hint": "blue kite",
+            "photo": (io.BytesIO(jpeg_with_exif()), "jo.jpg"),
+        },
+        content_type="multipart/form-data",
+    )
+    assert response.status_code == 302
+    page = client.get(f"/children/{school.ava.id}").data
+    assert b"Jo Marlow" in page and b"blue kite" in page
+    from school_portal.models import Collector
+
+    collector = db.session.scalar(select(Collector))
+    assert client.get(f"/media/{collector.photo_id}/thumb").status_code == 200
+    base = f"/rooms/{school.saplings.id}/children/{school.ava.id}"
+    client.post(f"{base}/check-in")
+    client.post(f"{base}/check-out", data={"collector": f"c:{collector.id}"})
+    assert rows(school.ava)[0].collector_id == collector.id
+    client.post("/logout")
+    # The family sees who may collect, but not the password.
+    login(client, school.sam)
+    page = client.get(f"/children/{school.ava.id}").data
+    assert b"Jo Marlow" in page and b"blue kite" not in page
+    assert client.get(f"/media/{collector.photo_id}/thumb").status_code == 200
+    client.post("/logout")
+    login(client, school.pat)
+    assert client.get(f"/media/{collector.photo_id}/thumb").status_code == 404
+
+
+def test_parents_cannot_add_collectors(client, school):
+    login(client, school.sam)
+    response = client.post(f"/children/{school.ava.id}/collectors", data={"name": "Stranger"})
+    assert response.status_code == 404

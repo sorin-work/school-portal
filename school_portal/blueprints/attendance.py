@@ -8,7 +8,7 @@ from .. import timeutil
 from ..decorators import staff_required
 from ..events import child_days
 from ..extensions import db
-from ..models import Attendance, Child
+from ..models import Attendance, Child, Collector
 from .room_view import child_in_room, room_children, room_or_404
 
 bp = Blueprint("attendance", __name__)
@@ -53,6 +53,12 @@ def collector_choices(child: Child) -> list[tuple[str, str]]:
     choices = []
     for link in child.guardians:
         choices.append((f"g:{link.user_id}", f"{link.user.name} ({link.relationship_label})"))
+    query = select(Collector).where(Collector.child_id == child.id)
+    for collector in db.session.scalars(query.order_by(Collector.name)):
+        label = collector.name + (
+            f" ({collector.relationship_label})" if collector.relationship_label else ""
+        )
+        choices.append((f"c:{collector.id}", label))
     return choices
 
 
@@ -77,6 +83,8 @@ def check_out(room_id: int, child_id: int):
         labels = dict(choices)
         if picked in labels:
             row.collected_by = labels[picked].split(" (")[0]
+            if picked.startswith("c:"):
+                row.collector_id = int(picked[2:])
         elif picked == "other" and other:
             row.collected_by = other
             row.note = (request.form.get("note") or "").strip() or None
@@ -104,4 +112,8 @@ def check_out(room_id: int, child_id: int):
 
 
 def _collectors(child: Child) -> list:
-    return []
+    return list(
+        db.session.scalars(
+            select(Collector).where(Collector.child_id == child.id, Collector.active)
+        )
+    )

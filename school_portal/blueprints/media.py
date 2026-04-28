@@ -6,12 +6,15 @@ from sqlalchemy import select
 
 from .. import access, photos, uploads
 from ..extensions import db
-from ..models import Child, Event, EventMedia, Media
+from ..models import Child, Collector, Event, EventMedia, Media
 
 bp = Blueprint("media", __name__, url_prefix="/media")
 
 
 def may_see(media: Media) -> bool:
+    if media.purpose == "collector":
+        collector = db.session.scalar(select(Collector).where(Collector.photo_id == media.id))
+        return collector is not None and access.can_view_child(current_user, collector.child)
     rows = db.session.execute(
         select(Event, Child)
         .join(EventMedia, EventMedia.event_id == Event.id)
