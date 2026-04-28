@@ -25,6 +25,9 @@ class Attendance(db.Model):
     )
     # Who collected the child: a guardian, a collector or a name typed in.
     collected_by: Mapped[str | None] = mapped_column(String(120))
+    collector_id: Mapped[int | None] = mapped_column(
+        ForeignKey("collectors.id", ondelete="SET NULL")
+    )
     note: Mapped[str | None] = mapped_column(Text)
 
     child = relationship("Child")

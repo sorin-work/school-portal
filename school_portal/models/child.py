@@ -96,3 +96,23 @@ class Guardian(db.Model):
     def can_act(self) -> bool:
         """Send messages, report absences, answer forms."""
         return self.access == "full"
+
+
+class Collector(db.Model):
+    """Someone other than a guardian who may collect the child."""
+
+    __tablename__ = "collectors"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    child_id: Mapped[int] = mapped_column(ForeignKey("children.id", ondelete="CASCADE"))
+    name: Mapped[str] = mapped_column(String(120))
+    relationship_label: Mapped[str | None] = mapped_column("relationship", String(40))
+    phone: Mapped[str | None] = mapped_column(String(40))
+    photo_id: Mapped[str | None] = mapped_column(ForeignKey("media.id", ondelete="SET NULL"))
+    # A word the collector gives at the door, checked by staff.
+    password_hint: Mapped[str | None] = mapped_column(String(80))
+    active: Mapped[bool] = mapped_column(default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    child = relationship("Child")
+    photo = relationship("Media")
