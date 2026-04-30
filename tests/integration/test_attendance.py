@@ -93,3 +93,36 @@ def test_parents_cannot_add_collectors(client, school):
     login(client, school.sam)
     response = client.post(f"/children/{school.ava.id}/collectors", data={"name": "Stranger"})
     assert response.status_code == 404
+
+
+def test_parent_reports_an_absence_and_the_room_is_told(client, school):
+    from datetime import timedelta
+
+    from school_portal.models import Absence
+
+    login(client, school.sam)
+    today = timeutil.today()
+    response = client.post(
+        f"/children/{school.ava.id}/absence",
+        data={
+            "start_date": today.isoformat(),
+            "end_date": (today + timedelta(days=1)).isoformat(),
+            "reason": "illness",
+            "note": "Temperature",
+        },
+    )
+    assert response.status_code == 302
+    (absence,) = db.session.scalars(select(Absence))
+    assert absence.covers(today)
+    client.post("/logout")
+    login(client, school.amy)
+    assert b"Absent: Illness" in client.get(f"/rooms/{school.saplings.id}/register").data
+
+
+def test_absence_dates_are_checked(client, school):
+    login(client, school.sam)
+    response = client.post(
+        f"/children/{school.ava.id}/absence",
+        data={"start_date": "2030-01-05", "end_date": "2030-01-01", "reason": "holiday"},
+    )
+    assert b"before the first" in response.data

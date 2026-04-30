@@ -9,7 +9,7 @@ from sqlalchemy import select
 from .. import access, photos, timeutil
 from ..events import day_events
 from ..extensions import db
-from ..models import Attendance, Event
+from ..models import Absence, Attendance, Event
 from ..models.event import MOODS
 
 bp = Blueprint("timeline", __name__)
@@ -46,6 +46,14 @@ def child_day(child_id: int):
     context = {}
     context["attendance"] = db.session.scalar(
         select(Attendance).where(Attendance.child_id == child.id, Attendance.day == day)
+    )
+    context["absence"] = db.session.scalar(
+        select(Absence).where(
+            Absence.child_id == child.id,
+            Absence.start_date <= day,
+            Absence.end_date >= day,
+            Absence.cancelled_at.is_(None),
+        )
     )
     return render_template(
         "timeline/day.html",

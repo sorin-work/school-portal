@@ -39,6 +39,7 @@ PostgreSQL for everything, including the small job queue the worker runs.
   collected the child.
   Authorised collectors have a photo and a collection password that staff
   see at the door.
+  Parents report absences ahead, and the room's staff are told.
 
 ## Quick start
 

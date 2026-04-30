@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "partials/forms.html" import field %}
+{% block title %}Absence · {{ child.display_name }}{% endblock %}
+{% block content %}
+<h1 class="page-title">Report an absence for {{ child.display_name }}</h1>
+<form method="post" class="card grid max-w-xl gap-4 sm:grid-cols-2" novalidate>
+  {{ form.hidden_tag() }}
+  {{ field(form.start_date) }}
+  {{ field(form.end_date) }}
+  {{ field(form.reason, class="sm:col-span-2") }}
+  {{ field(form.note, class="sm:col-span-2") }}
+  <div class="sm:col-span-2"><button class="btn btn-primary" type="submit">Send</button></div>
+</form>
+{% if upcoming %}
+<section class="card mt-6 max-w-xl">
+  <h2 class="section-title">Reported</h2>
+  <ul class="space-y-2 text-sm">
+    {% for absence in upcoming %}
+    <li class="flex items-center justify-between gap-2">
+      <span>{{ absence.start_date|date }}{% if absence.end_date != absence.start_date %} to {{ absence.end_date|date }}{% endif %}: {{ absence.reason_label }}</span>
+      <form method="post" action="{{ url_for('attendance.cancel_absence', child_id=child.id, absence_id=absence.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="link text-red-700" type="submit">Cancel</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}

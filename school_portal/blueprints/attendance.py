@@ -1,14 +1,19 @@
 """The register: who is in, who collected them, and absences reported ahead."""
 
-from flask import Blueprint, abort, render_template, request
-from flask_login import current_user
-from sqlalchemy import select
+from datetime import timedelta
 
-from .. import timeutil
+from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
+from flask_wtf import FlaskForm
+from sqlalchemy import select
+from wtforms import DateField, SelectField, TextAreaField
+from wtforms.validators import DataRequired, Length, Optional
+
+from .. import access, timeutil
 from ..decorators import staff_required
 from ..events import child_days
 from ..extensions import db
-from ..models import Attendance, Child, Collector
+from ..models import ABSENCE_REASONS, Absence, Attendance, Child, Collector
 from .room_view import child_in_room, room_children, room_or_404
 
 bp = Blueprint("attendance", __name__)
@@ -117,3 +122,66 @@ def _collectors(child: Child) -> list:
             select(Collector).where(Collector.child_id == child.id, Collector.active)
         )
     )
+
+
+class AbsenceForm(FlaskForm):
+    start_date = DateField("From", validators=[DataRequired()])
+    end_date = DateField("Until", validators=[DataRequired()])
+    reason = SelectField("Reason", choices=ABSENCE_REASONS)
+    note = TextAreaField(
+        "Anything the staff should know", validators=[Optional(), Length(max=1000)]
+    )
+
+
+@bp.route("/children/<int:child_id>/absence", methods=["GET", "POST"])
+@login_required
+def report_absence(child_id: int):
+    child = access.child_or_404(child_id)
+    today = timeutil.today()
+    form = AbsenceForm(start_date=today, end_date=today)
+    if form.validate_on_submit():
+        start, end = form.start_date.data, form.end_date.data
+        if end < start:
+            form.end_date.errors.append("The last day is before the first.")
+        elif start < today - timedelta(days=7):
+            form.start_date.errors.append("Absences can be reported up to a week back.")
+        elif (end - start).days > 60:
+            form.end_date.errors.append("Report at most two months at a time.")
+        else:
+            absence = Absence(
+                child_id=child.id,
+                start_date=start,
+                end_date=end,
+                reason=form.reason.data,
+                note=(form.note.data or "").strip() or None,
+                reported_by_id=current_user.id,
+            )
+            db.session.add(absence)
+            db.session.commit()
+            flash("Thank you, the staff have been told.", "success")
+            return redirect(url_for(".report_absence", child_id=child.id))
+    upcoming = list(
+        db.session.scalars(
+            select(Absence)
+            .where(
+                Absence.child_id == child.id,
+                Absence.end_date >= today,
+                Absence.cancelled_at.is_(None),
+            )
+            .order_by(Absence.start_date)
+        )
+    )
+    return render_template("attendance/absence.html", child=child, form=form, upcoming=upcoming)
+
+
+@bp.post("/children/<int:child_id>/absence/<int:absence_id>/cancel")
+@login_required
+def cancel_absence(child_id: int, absence_id: int):
+    child = access.child_or_404(child_id, act=True)
+    absence = db.session.get(Absence, absence_id)
+    if absence is None or absence.child_id != child.id:
+        abort(404)
+    absence.cancelled_at = timeutil.now()
+    db.session.commit()
+    flash("Absence cancelled.", "success")
+    return redirect(url_for(".report_absence", child_id=child.id))

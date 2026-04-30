@@ -5,6 +5,8 @@
     Went home {{ day.attendance.checked_out_at|time }}{% if day.attendance.collected_by %} with {{ day.attendance.collected_by }}{% endif %}
     {% elif day.attendance %}
     In since {{ day.attendance.checked_in_at|time }}
+    {% elif day.absence %}
+    <span class="text-amber-800">Absent: {{ day.absence.reason_label }}</span>
     {% else %}
     Not in yet
     {% endif %}
