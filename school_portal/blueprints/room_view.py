@@ -11,7 +11,7 @@ from .. import access, timeutil
 from ..decorators import staff_required
 from ..events import child_days, log_event
 from ..extensions import db
-from ..models import Child, CurriculumArea, Event, EventMedia, Room
+from ..models import Absence, Child, CurriculumArea, Event, EventMedia, Room
 from ..models.event import AMOUNTS, MEALS, MOODS, NAPPY, TOILET
 from ..uploads import UploadError, save_image
 
@@ -179,6 +179,20 @@ def bulk(room_id: int):
     if not children:
         flash("Choose at least one child.", "error")
         return redirect(url_for(".show", room_id=room.id))
+    today = timeutil.today()
+    absent = {
+        a.child_id
+        for a in db.session.scalars(
+            select(Absence).where(
+                Absence.child_id.in_([c.id for c in children]),
+                Absence.start_date <= today,
+                Absence.end_date >= today,
+                Absence.cancelled_at.is_(None),
+            )
+        )
+    }
+    skipped = [c for c in children if c.id in absent]
+    children = [c for c in children if c.id not in absent]
     when = when_from_form()
     note = (request.form.get("note") or "").strip() or None
     visibility = visibility_from_form()
@@ -213,6 +227,9 @@ def bulk(room_id: int):
         abort(400)
     db.session.commit()
     flash(f"Logged {label} for {len(children)} children.", "success")
+    if skipped:
+        names = ", ".join(c.short_name for c in skipped)
+        flash(f"Left out because they are reported absent today: {names}.", "info")
     return redirect(url_for(".show", room_id=room.id))
 
 

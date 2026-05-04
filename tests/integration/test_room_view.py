@@ -171,3 +171,32 @@ def test_an_incident_report_needs_what_was_done(client, school):
     )
     assert b"Say what was done" in response.data
     assert events_of(school.ava) == []
+
+
+def test_bulk_logging_leaves_out_children_reported_absent(client, school):
+    from school_portal import timeutil
+    from school_portal.models import Absence
+
+    db.session.add(
+        Absence(
+            child_id=school.leon.id,
+            start_date=timeutil.today(),
+            end_date=timeutil.today(),
+            reason="illness",
+        )
+    )
+    db.session.commit()
+    login(client, school.amy)
+    response = client.post(
+        f"/rooms/{school.saplings.id}/bulk",
+        data={
+            "kind": "meal",
+            "meal": "lunch",
+            "amount": "all",
+            "child_ids": [str(school.ava.id), str(school.leon.id)],
+        },
+        follow_redirects=True,
+    )
+    assert b"reported absent today: Leon K." in response.data
+    assert len(events_of(school.ava)) == 1
+    assert events_of(school.leon) == []

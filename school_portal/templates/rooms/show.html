@@ -52,7 +52,7 @@
       <div id="bulk-children" class="grid grid-cols-2 gap-1 text-sm">
         {% for child in children %}
         {% set state = days[child.id] %}
-        <label class="flex items-center gap-2"><input type="checkbox" name="child_ids" value="{{ child.id }}" checked> {{ child.short_name }}</label>
+        <label class="flex items-center gap-2"><input type="checkbox" name="child_ids" value="{{ child.id }}" {% if not state.absence %}checked{% endif %}> {{ child.short_name }}</label>
         {% endfor %}
       </div>
       <div class="grid grid-cols-2 gap-2">
