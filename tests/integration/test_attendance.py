@@ -51,6 +51,18 @@ def test_parents_see_arrival_in_the_diary(client, school):
     assert b"Arrived" in client.get(f"/children/{school.ava.id}/diary").data
 
 
+def test_a_second_tap_does_not_make_a_second_row(client, school):
+    login(client, school.amy)
+    base = f"/rooms/{school.saplings.id}/children/{school.ava.id}"
+    client.post(f"{base}/check-in")
+    client.post(f"{base}/check-in")
+    assert len(rows(school.ava)) == 1
+    client.post(f"{base}/check-out", data={"collector": f"g:{school.sam.id}"})
+    client.post(f"{base}/check-in")
+    (row,) = rows(school.ava)
+    assert row.checked_out_at is None
+
+
 def test_collectors_with_photos(client, school):
     import io
 

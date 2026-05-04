@@ -6,6 +6,7 @@ from flask import Blueprint, abort, flash, redirect, render_template, request, u
 from flask_login import current_user, login_required
 from flask_wtf import FlaskForm
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from wtforms import DateField, SelectField, TextAreaField
 from wtforms.validators import DataRequired, Length, Optional
 
@@ -40,16 +41,31 @@ def check_in(room_id: int, child_id: int):
     room = room_or_404(room_id)
     child = child_in_room(room, child_id)
     today = timeutil.today()
-    db.session.add(
-        Attendance(
-            child_id=child.id,
-            room_id=room.id,
-            day=today,
-            checked_in_at=timeutil.now(),
-            checked_in_by_id=current_user.id,
-        )
+    existing = db.session.scalar(
+        select(Attendance).where(Attendance.child_id == child.id, Attendance.day == today)
     )
-    db.session.commit()
+    if existing is not None:
+        # A second tap, or a child coming back the same day: keep the first
+        # arrival and clear the departure.
+        existing.checked_out_at = None
+        existing.checked_out_by_id = None
+        existing.collected_by = None
+        existing.collector_id = None
+    else:
+        db.session.add(
+            Attendance(
+                child_id=child.id,
+                room_id=room.id,
+                day=today,
+                checked_in_at=timeutil.now(),
+                checked_in_by_id=current_user.id,
+            )
+        )
+    try:
+        db.session.commit()
+    except IntegrityError:
+        # Two tablets checked the child in at the same moment; the other won.
+        db.session.rollback()
     return _row_response(room, child)
 
 

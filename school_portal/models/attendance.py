@@ -10,6 +10,7 @@ class Attendance(db.Model):
     """One row per child per day they were in, with who brought and collected them."""
 
     __tablename__ = "attendance"
+    __table_args__ = (db.UniqueConstraint("child_id", "day", name="uq_attendance_child_day"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     child_id: Mapped[int] = mapped_column(ForeignKey("children.id", ondelete="CASCADE"))
