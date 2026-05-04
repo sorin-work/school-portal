@@ -59,6 +59,7 @@ def collector_choices(child: Child) -> list[tuple[str, str]]:
     for link in child.guardians:
         choices.append((f"g:{link.user_id}", f"{link.user.name} ({link.relationship_label})"))
     query = select(Collector).where(Collector.child_id == child.id)
+    query = query.where(Collector.active)
     for collector in db.session.scalars(query.order_by(Collector.name)):
         label = collector.name + (
             f" ({collector.relationship_label})" if collector.relationship_label else ""

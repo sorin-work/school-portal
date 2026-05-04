@@ -95,6 +95,18 @@ def test_parents_cannot_add_collectors(client, school):
     assert response.status_code == 404
 
 
+def test_removed_collectors_are_not_offered(client, school):
+    from school_portal.models import Collector
+
+    collector = Collector(child_id=school.ava.id, name="Old Neighbour", active=False)
+    db.session.add(collector)
+    db.session.commit()
+    login(client, school.amy)
+    base = f"/rooms/{school.saplings.id}/children/{school.ava.id}"
+    client.post(f"{base}/check-in")
+    assert b"Old Neighbour" not in client.get(f"{base}/check-out").data
+
+
 def test_parent_reports_an_absence_and_the_room_is_told(client, school):
     from datetime import timedelta
 
