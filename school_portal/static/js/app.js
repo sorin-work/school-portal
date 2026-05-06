@@ -31,3 +31,9 @@ document.addEventListener("htmx:responseError", (event) => {
   }
 });
 
+document.addEventListener("htmx:afterRequest", (event) => {
+  const form = event.detail.elt;
+  if (event.detail.successful && form.matches && form.matches("form[data-reset-on-success]")) {
+    form.reset();
+  }
+});

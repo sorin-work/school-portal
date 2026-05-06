@@ -40,6 +40,8 @@ PostgreSQL for everything, including the small job queue the worker runs.
   Authorised collectors have a photo and a collection password that staff
   see at the door.
   Parents report absences ahead, and the room's staff are told.
+- **Messages** between a family and the staff, per child. There is no free
+  chat.
 
 ## Quick start
 

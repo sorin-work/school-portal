@@ -1,0 +1,11 @@
+<ol class="space-y-3">
+  {% for message in messages %}
+  {% set mine = message.author_id == current_user.id %}
+  <li class="card {% if mine %}ml-8 border-emerald-200 bg-emerald-50{% else %}mr-8{% endif %}">
+    <p class="text-xs text-stone-500">{{ message.author.name if message.author else "Someone" }}{% if message.author and message.author.is_staff %} (staff){% endif %}, {{ message.created_at|datetime }}</p>
+    <p class="mt-1 whitespace-pre-line">{{ message.body }}</p>
+  </li>
+  {% else %}
+  <li class="text-stone-600">No messages yet.</li>
+  {% endfor %}
+</ol>

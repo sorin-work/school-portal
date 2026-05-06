@@ -68,6 +68,9 @@ def _register_blueprints(app: Flask) -> None:
     from .blueprints import attendance
 
     app.register_blueprint(attendance.bp)
+    from .blueprints import messages
+
+    app.register_blueprint(messages.bp)
 
 
 def _register_error_pages(app: Flask) -> None:

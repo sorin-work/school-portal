@@ -9,6 +9,7 @@
   </div>
   <div class="flex flex-wrap gap-2">
     <a class="btn btn-primary" href="{{ url_for('timeline.child_day', child_id=child.id) }}">Diary</a>
+    <a class="btn btn-secondary" href="{{ url_for('messages.thread', child_id=child.id) }}">Messages</a>
     {% if not current_user.is_staff %}<a class="btn btn-secondary" href="{{ url_for('attendance.report_absence', child_id=child.id) }}">Report an absence</a>{% endif %}
     {% if current_user.is_admin %}<a class="btn btn-secondary" href="{{ url_for('admin_children.edit', child_id=child.id) }}">Edit</a>{% endif %}
   </div>

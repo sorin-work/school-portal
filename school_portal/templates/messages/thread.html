@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Messages about {{ child.display_name }} · {{ school_name }}{% endblock %}
+{% block content %}
+<h1 class="page-title">Messages about {{ child.display_name }}</h1>
+<p id="htmx-error" class="flash flash-error" hidden></p>
+<div id="messages" class="mb-4 max-w-3xl">{% include "messages/_list.html" %}</div>
+{% if can_post %}
+<form method="post" action="{{ url_for('messages.post', child_id=child.id) }}" hx-post="{{ url_for('messages.post', child_id=child.id) }}" hx-target="#messages" class="card max-w-3xl space-y-2" data-reset-on-success>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label class="label" for="body">Message</label>
+  <textarea class="input" id="body" name="body" rows="3" maxlength="4000" required></textarea>
+  <button class="btn btn-primary" type="submit">Send</button>
+</form>
+{% else %}
+<p class="text-sm text-stone-600">You can read these messages but not reply. Contact the school office if that is wrong.</p>
+{% endif %}
+{% endblock %}

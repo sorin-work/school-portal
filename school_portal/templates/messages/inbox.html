@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Messages · {{ school_name }}{% endblock %}
+{% block content %}
+<h1 class="page-title">Messages</h1>
+{% if children %}
+<div class="mb-4 flex flex-wrap gap-2">
+  {% for child in children %}<a class="btn btn-secondary" href="{{ url_for('messages.thread', child_id=child.id) }}">Write about {{ child.display_name }}</a>{% endfor %}
+</div>
+{% endif %}
+<ul class="card divide-y divide-stone-100">
+  {% for t in threads %}
+  <li class="py-3">
+    <a class="flex flex-wrap items-baseline justify-between gap-2" href="{{ url_for('messages.thread', child_id=t.child.id) }}">
+      <span>{{ t.child.display_name }}</span>
+      <span class="text-xs text-stone-500">{{ t.last.created_at|datetime }}</span>
+    </a>
+    <p class="truncate text-sm text-stone-600">{{ t.last.author.name if t.last.author else "Someone" }}: {{ t.last.body }}</p>
+  </li>
+  {% else %}
+  <li class="py-3 text-stone-600">No messages yet.</li>
+  {% endfor %}
+</ul>
+{% endblock %}
