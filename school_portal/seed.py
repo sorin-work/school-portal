@@ -13,7 +13,10 @@ from PIL import Image, ImageDraw
 from . import timeutil
 from .extensions import db
 from .models import (
+    Absence,
+    Attendance,
     Child,
+    Collector,
     CurriculumArea,
     Event,
     EventMedia,
@@ -259,6 +262,19 @@ def seed() -> None:
         db.session.add(Guardian(child=children[first], user=user, relationship_label="Parent"))
     db.session.flush()
 
+    db.session.add(
+        Collector(
+            child=children["Ava"],
+            name="Jo Marlow",
+            relationship_label="Childminder",
+            phone="07700 900321",
+            password_hint="blue kite",
+            photo=_photo(
+                "Collector Jo Marlow", 501, users["demo@example.com"], purpose="collector"
+            ),
+        )
+    )
+    db.session.add(Collector(child=children["Mila"], name="Anil Nair", relationship_label="Uncle"))
     areas = []
     for order, (code, name) in enumerate(EYFS):
         area = CurriculumArea(framework="EYFS", code=code, name=name, sort_order=order)
@@ -339,6 +355,8 @@ def _seed_days(rng, today, rooms, children, users) -> None:
         for child in children.values():
             room = child.room
             by = staff_by_room[room.name]
+            if is_today and child.first_name == "Isla":
+                continue
 
             def at(hour, minute, _day=day):
                 return timeutil.at(_day, time(hour, minute))
@@ -371,6 +389,25 @@ def _seed_days(rng, today, rooms, children, users) -> None:
                 db.session.add(event)
                 return event
 
+            arrive = at(8, rng.randint(0, 45))
+            if arrive <= now:
+                leave = at(16, rng.randint(30, 59)) if not is_today else None
+                collected = None
+                if leave is not None:
+                    guardian = child.guardians[0].user.name if child.guardians else "Parent"
+                    collected = guardian
+                db.session.add(
+                    Attendance(
+                        child_id=child.id,
+                        room_id=room.id,
+                        day=day,
+                        checked_in_at=arrive,
+                        checked_in_by_id=by.id,
+                        checked_out_at=leave,
+                        checked_out_by_id=by.id if leave else None,
+                        collected_by=collected,
+                    )
+                )
             add("mood", at(9, 5), {"mood": rng.choice(["happy", "settled", "settled", "tired"])})
             if room.name != "Class R":
                 add(
@@ -427,6 +464,16 @@ def _seed_days(rng, today, rooms, children, users) -> None:
                     created_by_id=users["tom.staff@example.com"].id,
                 )
             )
+    db.session.add(
+        Absence(
+            child_id=children["Isla"].id,
+            start_date=today,
+            end_date=today + timedelta(days=1),
+            reason="illness",
+            note="Temperature last night, keeping her at home.",
+            reported_by_id=users["family3@example.com"].id,
+        )
+    )
 
 
 def _seed_observations(today, rooms, children, users, areas) -> None:
