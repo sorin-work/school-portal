@@ -9,6 +9,7 @@
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <label class="label" for="body">Message</label>
   <textarea class="input" id="body" name="body" rows="3" maxlength="4000" required></textarea>
+  <p class="hint">{% if current_user.is_staff %}The family sees this.{% else %}Everyone working with {{ child.display_name }} sees this. For anything urgent, phone the school.{% endif %}</p>
   <button class="btn btn-primary" type="submit">Send</button>
 </form>
 {% else %}
