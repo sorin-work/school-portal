@@ -11,7 +11,7 @@
   {% for t in threads %}
   <li class="py-3">
     <a class="flex flex-wrap items-baseline justify-between gap-2" href="{{ url_for('messages.thread', child_id=t.child.id) }}">
-      <span>{{ t.child.display_name }}</span>
+      <span class="{% if t.unread %}font-semibold{% endif %}">{{ t.child.display_name }}{% if t.unread %} <span class="badge badge-emerald">New</span>{% endif %}</span>
       <span class="text-xs text-stone-500">{{ t.last.created_at|datetime }}</span>
     </a>
     <p class="truncate text-sm text-stone-600">{{ t.last.author.name if t.last.author else "Someone" }}: {{ t.last.body }}</p>
