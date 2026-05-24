@@ -15,6 +15,7 @@ from ..decorators import staff_required
 from ..events import child_days
 from ..extensions import db
 from ..models import ABSENCE_REASONS, Absence, Attendance, Child, Collector
+from ..notify import notify
 from .room_view import child_in_room, room_children, room_or_404
 
 bp = Blueprint("attendance", __name__)
@@ -174,6 +175,18 @@ def report_absence(child_id: int):
                 reported_by_id=current_user.id,
             )
             db.session.add(absence)
+            when = (
+                timeutil.fmt_date(start)
+                if start == end
+                else (f"{timeutil.fmt_date(start)} to {timeutil.fmt_date(end)}")
+            )
+            notify(
+                access.staff_for_child(child),
+                "absence",
+                f"{child.display_name} will be absent {when}: {absence.reason_label}",
+                url_for("children.show", child_id=child.id),
+                child=child,
+            )
             db.session.commit()
             flash("Thank you, the staff have been told.", "success")
             return redirect(url_for(".report_absence", child_id=child.id))

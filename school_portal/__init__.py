@@ -71,6 +71,9 @@ def _register_blueprints(app: Flask) -> None:
     from .blueprints import messages
 
     app.register_blueprint(messages.bp)
+    from .blueprints import notifications
+
+    app.register_blueprint(notifications.bp)
 
 
 def _register_error_pages(app: Flask) -> None:
@@ -107,4 +110,11 @@ def _register_template_helpers(app: Flask) -> None:
     def inject_globals():
         school_name = app.config["SCHOOL_NAME"]
         values = {"school_name": school_name, "today": timeutil.today()}
+        from flask import has_request_context
+        from flask_login import current_user
+
+        if has_request_context() and current_user.is_authenticated:
+            from .blueprints.notifications import unread_count
+
+            values["unread_notifications"] = unread_count(current_user)
         return values

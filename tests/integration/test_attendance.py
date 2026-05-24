@@ -138,6 +138,10 @@ def test_parent_reports_an_absence_and_the_room_is_told(client, school):
     assert response.status_code == 302
     (absence,) = db.session.scalars(select(Absence))
     assert absence.covers(today)
+    from school_portal.models import Notification
+
+    notified = {n.user_id for n in db.session.scalars(select(Notification))}
+    assert school.amy.id in notified and school.ben.id not in notified
     client.post("/logout")
     login(client, school.amy)
     assert b"Absent: Illness" in client.get(f"/rooms/{school.saplings.id}/register").data

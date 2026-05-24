@@ -11,6 +11,7 @@ from ..events import day_events
 from ..extensions import db
 from ..models import Absence, Attendance, Event
 from ..models.event import MOODS
+from ..notify import notify
 
 bp = Blueprint("timeline", __name__)
 
@@ -80,6 +81,16 @@ def acknowledge(event_id: int):
     if event.acknowledged_at is None:
         event.acknowledged_at = timeutil.now()
         event.acknowledged_by_id = current_user.id
+        notify(
+            access.staff_for_child(child),
+            "acknowledged",
+            f"{current_user.name} acknowledged the {event.label.lower()} report for "
+            f"{child.display_name}",
+            url_for(
+                "timeline.child_day", child_id=child.id, day=timeutil.fmt_isoday(event.occurred_at)
+            ),
+            child=child,
+        )
         db.session.commit()
         flash("Thank you, the staff can see that you have read it.", "success")
     return redirect(

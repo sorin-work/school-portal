@@ -5,13 +5,14 @@ in it are the child's guardians with full access and the staff who can see
 the child.
 """
 
-from flask import Blueprint, abort, render_template, request
+from flask import Blueprint, abort, render_template, request, url_for
 from flask_login import current_user, login_required
 from sqlalchemy import func, select
 
 from .. import access
 from ..extensions import db
 from ..models import Child, Message, MessageRead
+from ..notify import notify
 
 bp = Blueprint("messages", __name__)
 
@@ -96,6 +97,19 @@ def post(child_id: int):
     db.session.add(message)
     db.session.flush()
     _mark_read(child.id, message.id)
+    if current_user.is_staff:
+        recipients = [g.user for g in access.acting_guardians(child)]
+    else:
+        recipients = access.staff_for_child(child) + [
+            g.user for g in access.acting_guardians(child) if g.user_id != current_user.id
+        ]
+    notify(
+        [u for u in recipients if u.id != current_user.id],
+        "message",
+        f"New message about {child.display_name} from {current_user.name}",
+        url_for("messages.thread", child_id=child.id),
+        child=child,
+    )
     db.session.commit()
     messages = list(
         db.session.scalars(select(Message).where(Message.child_id == child.id).order_by(Message.id))

@@ -161,6 +161,10 @@ def test_an_accident_report_asks_the_family(client, school):
     assert report.needs_ack
     # Reports are always for the family, whatever the form says.
     assert report.visibility == "parents"
+    from school_portal.models import Notification
+
+    (note,) = db.session.scalars(select(Notification).where(Notification.user_id == school.sam.id))
+    assert "acknowledge" in note.title
 
 
 def test_an_incident_report_needs_what_was_done(client, school):

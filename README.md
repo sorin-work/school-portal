@@ -42,6 +42,8 @@ PostgreSQL for everything, including the small job queue the worker runs.
   Parents report absences ahead, and the room's staff are told.
 - **Messages** between a family and the staff, per child. There is no free
   chat.
+- **Notifications** in the app for messages, reports, absences, notices and
+  calendar events.
 
 ## Quick start
 

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Notifications · {{ school_name }}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+  <h1 class="page-title mb-0">Notifications</h1>
+</div>
+<ul class="card divide-y divide-stone-100">
+  {% for item in items %}
+  <li class="py-3">
+    <a class="flex flex-wrap items-baseline justify-between gap-2" href="{{ url_for('notifications.open_one', notification_id=item.id) }}">
+      <span class="{% if not item.read_at %}font-semibold{% endif %}">{{ item.title }}</span>
+      <span class="text-xs text-stone-500">{{ item.created_at|datetime }}</span>
+    </a>
+  </li>
+  {% else %}
+  <li class="py-3 text-stone-600">Nothing yet.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

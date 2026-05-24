@@ -13,6 +13,7 @@ from ..events import child_days, log_event
 from ..extensions import db
 from ..models import Absence, Child, CurriculumArea, Event, EventMedia, Room
 from ..models.event import AMOUNTS, MEALS, MOODS, NAPPY, TOILET
+from ..notify import notify
 from ..uploads import UploadError, save_image
 
 bp = Blueprint("room_view", __name__, url_prefix="/rooms")
@@ -328,6 +329,17 @@ def incident(room_id: int):
             event = log_event(child, room, kind, when_from_form(), details, what, "parents")
             event.needs_ack = True
             db.session.flush()
+            notify(
+                [g.user for g in access.visible_guardians(child)],
+                "incident",
+                f"{event.label} report for {child.display_name}: please read and acknowledge",
+                url_for(
+                    "timeline.child_day",
+                    child_id=child.id,
+                    day=timeutil.fmt_isoday(event.occurred_at),
+                ),
+                child=child,
+            )
             db.session.commit()
             flash(
                 f"{event.label} recorded. The family has been asked to acknowledge it.", "success"

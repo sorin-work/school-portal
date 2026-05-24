@@ -53,3 +53,17 @@ def test_empty_and_huge_messages_are_refused(client, school):
     )
     response = client.post(f"/children/{school.ava.id}/messages", data={"body": "x" * 4001})
     assert response.status_code == 400
+
+
+def test_a_message_notifies_the_other_side(client, school):
+    from school_portal.models import Notification
+
+    login(client, school.sam)
+    client.post(f"/children/{school.ava.id}/messages", data={"body": "Hello"})
+    users = {n.user_id for n in db.session.scalars(select(Notification))}
+    assert users == {school.amy.id}
+    client.post("/logout")
+    login(client, school.amy)
+    assert b'badge-red">1<' in client.get("/notifications/count").data
+    client.post("/notifications/read")
+    assert b"badge" not in client.get("/notifications/count").data
