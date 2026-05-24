@@ -3,6 +3,7 @@ from .child import ACCESS_CHOICES, PHOTO_CONSENT_CHOICES, Child, Collector, Guar
 from .event import KINDS, CurriculumArea, Event, EventMedia
 from .media import Media
 from .message import Message, MessageRead
+from .notification import Notification
 from .room import Room, RoomStaff
 from .user import Role, User
 
@@ -22,6 +23,7 @@ __all__ = [
     "Media",
     "Message",
     "MessageRead",
+    "Notification",
     "Role",
     "Room",
     "RoomStaff",
