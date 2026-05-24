@@ -22,6 +22,7 @@ from .models import (
     EventMedia,
     Guardian,
     Media,
+    Message,
     Role,
     Room,
     RoomStaff,
@@ -285,6 +286,7 @@ def seed() -> None:
     _seed_days(rng, today, rooms, children, users)
     _seed_observations(today, rooms, children, users, areas)
     _seed_incidents(today, rooms, children, users)
+    _seed_messages(today, children, users)
     db.session.commit()
 
 
@@ -594,5 +596,41 @@ def _seed_incidents(today, rooms, children, users) -> None:
             visibility="parents",
             needs_ack=True,
             created_by_id=users["amira.lead@example.com"].id,
+        )
+    )
+
+
+def _seed_messages(today, children, users) -> None:
+    base = timeutil.at(school_days(today, 2)[0], time(7, 40))
+    thread = [
+        (
+            users["parent@example.com"],
+            "Morning! Ava was up in the night with a cough, she might be tired today.",
+        ),
+        (
+            users["amira.lead@example.com"],
+            "Thanks for letting us know. We'll keep her nap at the usual time and tell you how she gets on.",
+        ),
+        (
+            users["amira.lead@example.com"],
+            "She slept for an hour and a half and was much brighter after.",
+        ),
+        (users["parent@example.com"], "That's great, thank you."),
+    ]
+    for offset, (author, body) in enumerate(thread):
+        db.session.add(
+            Message(
+                child_id=children["Ava"].id,
+                author_id=author.id,
+                body=body,
+                created_at=base + timedelta(hours=offset * 3),
+            )
+        )
+    db.session.add(
+        Message(
+            child_id=children["Mila"].id,
+            author_id=users["parent2@example.com"].id,
+            body="Could you try her with the new beaker at lunch? She has started using one at home.",
+            created_at=base + timedelta(hours=1),
         )
     )
