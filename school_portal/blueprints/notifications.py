@@ -1,6 +1,6 @@
-from flask import Blueprint, redirect, render_template, url_for
+from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 
 from .. import timeutil
 from ..extensions import db
@@ -53,3 +53,17 @@ def open_one(notification_id: int):
         db.session.commit()
     target = item.url or url_for(".index")
     return redirect(target)
+
+
+@bp.post("/read")
+@login_required
+def mark_all_read():
+    db.session.execute(
+        update(Notification)
+        .where(Notification.user_id == current_user.id, Notification.read_at.is_(None))
+        .values(read_at=timeutil.now())
+    )
+    db.session.commit()
+    if request.headers.get("HX-Request"):
+        return render_template("notifications/_count.html", unread_notifications=0)
+    return redirect(url_for(".index"))
