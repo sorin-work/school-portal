@@ -4,7 +4,7 @@ from school_portal import timeutil
 from school_portal.extensions import db
 from school_portal.models import Attendance
 
-from ..conftest import login
+from ..conftest import link, login, make_user
 
 
 def rows(child):
@@ -154,3 +154,10 @@ def test_absence_dates_are_checked(client, school):
         data={"start_date": "2030-01-05", "end_date": "2030-01-01", "reason": "holiday"},
     )
     assert b"before the first" in response.data
+
+
+def test_timeline_only_guardians_cannot_report_absences(client, school):
+    gran = make_user("parent", email="gran@example.com")
+    link(gran, school.ava, access="read_only")
+    login(client, gran)
+    assert client.get(f"/children/{school.ava.id}/absence").status_code == 404

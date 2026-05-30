@@ -154,7 +154,7 @@ class AbsenceForm(FlaskForm):
 @bp.route("/children/<int:child_id>/absence", methods=["GET", "POST"])
 @login_required
 def report_absence(child_id: int):
-    child = access.child_or_404(child_id)
+    child = access.child_or_404(child_id, act=True)
     today = timeutil.today()
     form = AbsenceForm(start_date=today, end_date=today)
     if form.validate_on_submit():
