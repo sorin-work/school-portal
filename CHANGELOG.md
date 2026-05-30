@@ -2,6 +2,17 @@
 
 All notable changes, newest first. Dates are when the version was tagged.
 
+## 0.4.0 (2026-05-30)
+
+- Attendance register with arrival, going home and who collected
+- Authorised collectors with photos and a collection password
+- Absence reporting by families
+- Messages per child between the family and the staff
+- In-app notifications
+- One register row per child and day
+- Bulk logging leaves out children reported absent
+- Timeline-only guardians can no longer report absences
+
 ## 0.3.0 (2026-04-11)
 
 - Photos on learning observations, checked by type and size, with EXIF
