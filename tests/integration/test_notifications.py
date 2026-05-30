@@ -31,3 +31,14 @@ def test_someone_elses_notification_is_not_opened(client, app):
     login(client, other)
     client.get(f"/notifications/{item.id}")
     assert item.read_at is None
+
+
+def test_only_local_links_are_followed(client, app):
+    user = make_user(Role.PARENT)
+    notify([user], "x", "Odd", "https://example.com/")
+    db.session.commit()
+    from school_portal.models import Notification
+
+    item = db.session.scalar(db.select(Notification))
+    login(client, user)
+    assert client.get(f"/notifications/{item.id}").headers["Location"] == "/notifications/"

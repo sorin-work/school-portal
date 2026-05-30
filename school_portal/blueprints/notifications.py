@@ -52,6 +52,8 @@ def open_one(notification_id: int):
         item.read_at = timeutil.now()
         db.session.commit()
     target = item.url or url_for(".index")
+    if not target.startswith("/") or target.startswith("//"):
+        target = url_for(".index")
     return redirect(target)
 
 
