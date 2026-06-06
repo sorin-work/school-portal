@@ -107,6 +107,9 @@ development; `.env.example` lists them.
 | `SHOW_DEMO_LOGINS` | `false` | List the demo accounts on the sign-in page |
 | `UPLOAD_DIR` | `./uploads` | Where photos are stored |
 | `MAX_UPLOAD_MB` | `8` | Largest photo accepted |
+| `SMTP_HOST`, `SMTP_PORT` | `127.0.0.1`, `1025` | Outgoing mail |
+| `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_TLS` | empty, empty, `false` | Mail server sign-in |
+| `MAIL_FROM` | `School Portal <portal@example.com>` | Sender of every email |
 
 
 ## Development

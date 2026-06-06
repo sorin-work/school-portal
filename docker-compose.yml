@@ -30,6 +30,9 @@ services:
       SEED_DEMO: ${SEED_DEMO:-true}
       # Lists the demo accounts on the sign-in page.
       SHOW_DEMO_LOGINS: ${SHOW_DEMO_LOGINS:-true}
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      MAIL_FROM: "Willow Brook <office@example.com>"
       UPLOAD_DIR: /data/uploads
     volumes:
       - uploads:/data/uploads
@@ -44,6 +47,12 @@ services:
       timeout: 5s
       start_period: 20s
       retries: 5
+
+  mailpit:
+    image: axllent/mailpit:v1.21
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8033:8025"
 
 volumes:
   db-data:

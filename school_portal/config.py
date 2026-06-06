@@ -40,6 +40,12 @@ class Config:
         self.MAX_UPLOAD_MB = _int("MAX_UPLOAD_MB", 8)
         # Leave room for a few photos and the form fields in one request.
         self.MAX_CONTENT_LENGTH = (self.MAX_UPLOAD_MB * 4 + 1) * 1024 * 1024
+        self.SMTP_HOST = os.environ.get("SMTP_HOST", "127.0.0.1")
+        self.SMTP_PORT = _int("SMTP_PORT", 1025)
+        self.SMTP_USER = os.environ.get("SMTP_USER", "")
+        self.SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
+        self.SMTP_TLS = _bool("SMTP_TLS")
+        self.MAIL_FROM = os.environ.get("MAIL_FROM", "School Portal <portal@example.com>")
         self.TESTING = False
 
     @property
