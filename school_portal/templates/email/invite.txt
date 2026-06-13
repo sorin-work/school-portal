@@ -1,0 +1,9 @@
+Hello {{ user.first_name }},
+
+{{ school_name }} has made you an account on the school portal, where you can follow your child's day, read notices and send messages to the staff.
+
+Open this link within seven days to choose your password:
+
+{{ link }}
+
+Your sign-in address is {{ user.email }}.

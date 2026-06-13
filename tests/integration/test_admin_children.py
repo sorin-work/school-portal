@@ -74,3 +74,25 @@ def test_staff_accounts_cannot_be_guardians(client, app):
         data={"g-email": staff.email, "g-relationship": "Parent", "g-access": "full"},
     )
     assert child.guardians == []
+
+
+def test_a_new_address_gets_an_account_and_an_invitation(client, app):
+    from school_portal.models import User
+
+    admin = make_user(Role.ADMIN)
+    child = make_child()
+    login(client, admin)
+    client.post(
+        f"/admin/children/{child.id}/guardians",
+        data={
+            "g-email": "new@example.com",
+            "g-name": "Nia New",
+            "g-relationship": "Father",
+            "g-access": "full",
+        },
+    )
+    user = db.session.scalar(db.select(User).where(User.email == "new@example.com"))
+    assert user.role == "parent" and user.password_hash is None
+    outbox = app.extensions["outbox"]
+    assert outbox[-1]["To"] == "new@example.com"
+    assert "/reset/" in outbox[-1].get_content()

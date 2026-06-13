@@ -2,7 +2,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from sqlalchemy import func, select
-from wtforms import BooleanField, EmailField, PasswordField, SelectField, StringField
+from wtforms import BooleanField, EmailField, SelectField, StringField
 from wtforms.validators import DataRequired, Email, Length, Optional
 
 from ..decorators import admin_required
@@ -24,10 +24,6 @@ class UserForm(FlaskForm):
     role = SelectField("Role", choices=ROLE_CHOICES)
     phone = StringField("Phone", validators=[Optional(), Length(max=40)])
     active = BooleanField("Can sign in", default=True)
-    password = PasswordField(
-        "Password",
-        validators=[Optional(), Length(min=10, message="Use at least 10 characters.")],
-    )
 
 
 @bp.get("/")
@@ -58,10 +54,11 @@ def create():
                 phone=form.phone.data or None,
                 active=form.active.data,
             )
-            if form.password.data:
-                user.set_password(form.password.data)
             db.session.add(user)
             db.session.flush()
+            from .admin_children import _send_invite
+
+            _send_invite(user)
             db.session.commit()
             flash(f"Account for {user.name} created.", "success")
             return redirect(url_for(".edit", user_id=user.id))
@@ -92,10 +89,20 @@ def edit(user_id: int):
             user.role = form.role.data
             user.phone = form.phone.data or None
             user.active = form.active.data
-            if form.password.data:
-                user.set_password(form.password.data)
             db.session.commit()
             flash("Saved.", "success")
             return redirect(url_for(".edit", user_id=user.id))
     links = list(db.session.scalars(select(Guardian).where(Guardian.user_id == user.id)))
     return render_template("admin/user_form.html", form=form, user=user, links=links)
+
+
+@bp.post("/<int:user_id>/invite")
+@admin_required
+def resend_invite(user_id: int):
+    from .admin_children import _send_invite
+
+    user = db.get_or_404(User, user_id)
+    _send_invite(user)
+    db.session.commit()
+    flash(f"Invitation sent to {user.email}.", "success")
+    return redirect(url_for(".edit", user_id=user.id))

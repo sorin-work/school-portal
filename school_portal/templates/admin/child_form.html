@@ -54,6 +54,7 @@
   <form method="post" action="{{ url_for('admin_children.add_guardian', child_id=child.id) }}" class="grid gap-3 sm:grid-cols-2" novalidate>
     {{ guardian_form.hidden_tag() }}
     {{ field(guardian_form.email) }}
+    {{ field(guardian_form.name, hint="Only needed when the address has no account; an invitation is sent.") }}
     {{ field(guardian_form.relationship) }}
     {{ field(guardian_form.access) }}
     <div class="sm:col-span-2"><button class="btn btn-secondary" type="submit">Link a parent or carer</button></div>

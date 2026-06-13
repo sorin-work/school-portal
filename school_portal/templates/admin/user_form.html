@@ -9,12 +9,18 @@
   {{ field(form.email) }}
   {{ field(form.role) }}
   {{ field(form.phone) }}
-  {{ field(form.password, hint="Leave empty to keep the current password.") }}
   {{ field(form.active, class="sm:col-span-2") }}
   <div class="sm:col-span-2"><button class="btn btn-primary" type="submit">Save</button></div>
+  {% if not user %}<p class="hint sm:col-span-2">The new account gets an email with a link to choose a password.</p>{% endif %}
 </form>
 {% if user %}
 <div class="mt-4 flex flex-wrap gap-2">
+  {% if not user.password_hash %}
+  <form method="post" action="{{ url_for('admin_users.resend_invite', user_id=user.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn btn-secondary" type="submit">Send the invitation again</button>
+  </form>
+  {% endif %}
 </div>
 {% if links %}
 <section class="card mt-6 max-w-2xl">

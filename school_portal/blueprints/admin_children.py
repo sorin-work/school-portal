@@ -1,11 +1,13 @@
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask import Blueprint, abort, current_app, flash, redirect, render_template, request, url_for
 from flask_wtf import FlaskForm
 from sqlalchemy import func, or_, select
 from wtforms import BooleanField, DateField, EmailField, SelectField, StringField, TextAreaField
 from wtforms.validators import DataRequired, Email, Length, Optional
 
+from .. import tokens
 from ..decorators import admin_required
 from ..extensions import db
+from ..mail import queue_email
 from ..models import ACCESS_CHOICES, PHOTO_CONSENT_CHOICES, Child, Guardian, Role, Room, User
 
 bp = Blueprint("admin_children", __name__, url_prefix="/admin/children")
@@ -28,6 +30,7 @@ class ChildForm(FlaskForm):
 
 class GuardianForm(FlaskForm):
     email = EmailField("Email", validators=[DataRequired(), Email()])
+    name = StringField("Name (for a new account)", validators=[Optional(), Length(max=120)])
     relationship = StringField("Relationship", default="Parent", validators=[Length(max=40)])
     access = SelectField("Access", choices=ACCESS_CHOICES, default="full")
 
@@ -148,8 +151,15 @@ def add_guardian(child_id: int):
     email = form.email.data.strip().lower()
     user = db.session.scalar(select(User).where(func.lower(User.email) == email))
     if user is None:
-        flash("There is no account with that address. Add it under Users first.", "error")
-        return redirect(url_for(".edit", child_id=child.id) + "#guardians")
+        name = (form.name.data or "").strip()
+        if not name:
+            flash("There is no account for that address yet. Add a name to create one.", "error")
+            return redirect(url_for(".edit", child_id=child.id) + "#guardians")
+        user = User(email=email, name=name, role=Role.PARENT)
+        db.session.add(user)
+        db.session.flush()
+        _send_invite(user)
+        flash(f"Account created and an invitation sent to {email}.", "info")
     elif user.role != Role.PARENT:
         flash("That address belongs to a staff account. Use a separate parent account.", "error")
         return redirect(url_for(".edit", child_id=child.id) + "#guardians")
@@ -174,6 +184,17 @@ def _first_error(form) -> str:
         if errors:
             return errors[0]
     return "invalid"
+
+
+def _send_invite(user: User) -> None:
+    token = tokens.issue(user, "invite")
+    queue_email(
+        user.email,
+        "Your account for the school portal",
+        "email/invite.txt",
+        user=user,
+        link=current_app.config["BASE_URL"] + url_for("auth.reset", token=token),
+    )
 
 
 @bp.post("/<int:child_id>/guardians/<int:guardian_id>/remove")
