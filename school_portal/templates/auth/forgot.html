@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% from "partials/forms.html" import field %}
+{% block title %}Forgotten password · {{ school_name }}{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-sm">
+  <h1 class="page-title">Forgotten password</h1>
+  <form method="post" class="card space-y-4" novalidate>
+    {{ form.hidden_tag() }}
+    <p class="text-sm text-stone-600">Type the address you sign in with and we will email you a link to set a new password.</p>
+    {{ field(form.email) }}
+    <button class="btn btn-primary w-full" type="submit">Send the link</button>
+    <p class="text-sm"><a class="link" href="{{ url_for('auth.login') }}">Back to sign in</a></p>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,7 @@
+Hello {{ user.first_name }},
+
+Someone asked to reset the password of your {{ school_name }} account. If it was you, open this link within an hour to choose a new password:
+
+{{ link }}
+
+If it was not you, ignore this email. Your password stays as it is.
