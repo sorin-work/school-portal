@@ -1,6 +1,7 @@
 from .attendance import ABSENCE_REASONS, Absence, Attendance
 from .child import ACCESS_CHOICES, PHOTO_CONSENT_CHOICES, Child, Collector, Guardian
 from .event import KINDS, CurriculumArea, Event, EventMedia
+from .job import Job
 from .media import Media
 from .message import Message, MessageRead
 from .notification import Notification
@@ -21,6 +22,7 @@ __all__ = [
     "Event",
     "EventMedia",
     "Guardian",
+    "Job",
     "Media",
     "Message",
     "MessageRead",
