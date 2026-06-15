@@ -121,6 +121,7 @@ def reset(token: str):
         user = record.user
         user.set_password(form.password.data)
         record.used_at = timeutil.now()
+        tokens.revoke_others(user, record)
         db.session.commit()
         flash("Your password is set. Sign in with it now.", "info")
         return redirect(url_for("auth.login"))

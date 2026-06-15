@@ -53,3 +53,13 @@ def test_short_passwords_are_refused(client, app):
     link = reset_link(sent(app)[0])
     response = client.post(link, data={"password": "short", "confirm": "short"})
     assert b"at least 10 characters" in response.data
+
+
+def test_a_reset_cancels_the_other_links(client, app):
+    make_user(Role.PARENT, email="sam@example.com")
+    client.post("/forgot", data={"email": "sam@example.com"})
+    client.post("/forgot", data={"email": "sam@example.com"})
+    first, second = (reset_link(m) for m in sent(app))
+    client.post(second, data={"password": "the new password", "confirm": "the new password"})
+    response = client.get(first)
+    assert response.status_code == 302
