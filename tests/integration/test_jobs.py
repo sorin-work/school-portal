@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select
 
@@ -59,3 +59,13 @@ def test_unknown_kinds_fail_instead_of_vanishing(app):
     db.session.commit()
     jobs.run_due()
     assert "no handler" in all_jobs()[0].last_error
+
+
+def test_housekeeping_is_scheduled_once_a_day(app):
+    early = datetime(2026, 3, 3, 1, 0, tzinfo=UTC)
+    later = datetime(2026, 3, 3, 9, 0, tzinfo=UTC)
+    jobs.schedule(early)
+    assert [j.kind for j in all_jobs()] == []
+    jobs.schedule(later)
+    jobs.schedule(later + timedelta(hours=1))
+    assert [j.kind for j in all_jobs() if j.kind == "housekeeping"] == ["housekeeping"]

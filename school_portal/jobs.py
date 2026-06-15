@@ -107,7 +107,16 @@ def schedule(now=None) -> None:
     local = timeutil.local(now)
     day = local.date().isoformat()
     log.debug("scheduling for %s", day)
+    # Housekeeping runs once a day, early in the morning.
+    if local.hour >= 2:
+        enqueue("housekeeping", {"day": day}, unique_key=f"housekeeping:{day}")
     db.session.commit()
+
+
+@handler("housekeeping")
+def housekeeping(payload: dict) -> None:
+    cutoff = timeutil.now() - timedelta(days=30)
+    db.session.execute(Job.__table__.delete().where(Job.status == "done", Job.finished_at < cutoff))
 
 
 def work_forever(poll_seconds: float = 5.0) -> None:  # pragma: no cover - runs in the worker
