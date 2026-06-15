@@ -6,6 +6,9 @@ from ..conftest import login, make_user
 
 
 def sent(app):
+    from school_portal.jobs import run_due
+
+    run_due()
     return app.extensions.get("outbox", [])
 
 

@@ -93,6 +93,9 @@ def test_a_new_address_gets_an_account_and_an_invitation(client, app):
     )
     user = db.session.scalar(db.select(User).where(User.email == "new@example.com"))
     assert user.role == "parent" and user.password_hash is None
+    from school_portal.jobs import run_due
+
+    run_due()
     outbox = app.extensions["outbox"]
     assert outbox[-1]["To"] == "new@example.com"
     assert "/reset/" in outbox[-1].get_content()

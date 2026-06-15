@@ -35,3 +35,14 @@ def register_cli(app: Flask) -> None:
             return
         seed()
         click.echo("Demo school created. Sign in as demo@example.com / demo-password.")
+
+    @app.cli.command("worker")
+    @click.option("--poll", default=5.0, help="Seconds to wait when there is nothing to do.")
+    def worker(poll: float) -> None:
+        """Run background jobs until stopped."""
+        import logging
+
+        from .jobs import work_forever
+
+        logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+        work_forever(poll)

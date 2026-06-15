@@ -8,6 +8,8 @@ from email.message import EmailMessage
 
 from flask import current_app, render_template
 
+from . import jobs
+
 
 def send_email(to: str, subject: str, body: str) -> None:
     app = current_app
@@ -30,4 +32,9 @@ def send_email(to: str, subject: str, body: str) -> None:
 def queue_email(to: str, subject: str, template: str, **context) -> None:
     """Render an email now and send it from the worker."""
     body = render_template(template, **context)
-    send_email(to, subject, body)
+    jobs.enqueue("email", {"to": to, "subject": subject, "body": body})
+
+
+@jobs.handler("email")
+def _send_job(payload: dict) -> None:
+    send_email(payload["to"], payload["subject"], payload["body"])
