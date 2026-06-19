@@ -31,7 +31,7 @@
           Notifications
           <span hx-get="{{ url_for('notifications.count') }}" hx-trigger="every 60s" hx-swap="innerHTML">{% include "notifications/_count.html" %}</span>
         </a>
-        <span class="text-stone-600">{{ current_user.first_name }}</span>
+        <a class="nav-link" href="{{ url_for('account.edit') }}">{{ current_user.first_name }}</a>
         <form method="post" action="{{ url_for('auth.logout') }}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button class="nav-link" type="submit">Sign out</button>

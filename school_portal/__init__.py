@@ -74,6 +74,9 @@ def _register_blueprints(app: Flask) -> None:
     from .blueprints import notifications
 
     app.register_blueprint(notifications.bp)
+    from .blueprints import account
+
+    app.register_blueprint(account.bp)
 
 
 def _register_error_pages(app: Flask) -> None:

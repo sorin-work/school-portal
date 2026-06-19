@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% from "partials/forms.html" import field %}
+{% block title %}Your account · {{ school_name }}{% endblock %}
+{% block content %}
+<h1 class="page-title">Your account</h1>
+<div class="grid gap-6 md:grid-cols-2">
+  <form method="post" class="card space-y-4" novalidate>
+    <input type="hidden" name="form" value="details">
+    {{ details.hidden_tag() }}
+    <h2 class="section-title">Details</h2>
+    <p class="text-sm text-stone-600">You sign in as {{ current_user.email }}. The school office can change the address.</p>
+    {{ field(details.name) }}
+    {{ field(details.phone) }}
+    <button class="btn btn-primary" type="submit">Save</button>
+  </form>
+</div>
+{% endblock %}
