@@ -46,3 +46,11 @@ def register_cli(app: Flask) -> None:
 
         logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
         work_forever(poll)
+
+    @app.cli.command("run-jobs")
+    def run_jobs() -> None:
+        """Queue what is due and run the queue once, then exit."""
+        from .jobs import run_due, schedule
+
+        schedule()
+        click.echo(f"Ran {run_due(limit=500)} jobs.")
