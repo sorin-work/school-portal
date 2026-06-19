@@ -128,6 +128,10 @@ flask --app school_portal seed-demo      # optional
 flask --app school_portal run --port 4433 --debug
 ```
 
+Background work (email, the daily summary, the nightly housekeeping) runs in
+the worker: `flask --app school_portal worker`, or `flask --app school_portal
+run-jobs` to run the queue once. Without a worker, emails wait in the `jobs`
+table.
 
 An administrator for a fresh database: `flask --app school_portal create-admin`.
 
