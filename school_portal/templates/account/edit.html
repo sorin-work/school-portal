@@ -13,5 +13,14 @@
     {{ field(details.phone) }}
     <button class="btn btn-primary" type="submit">Save</button>
   </form>
+  <form method="post" class="card space-y-4" novalidate>
+    <input type="hidden" name="form" value="password">
+    {{ password.hidden_tag() }}
+    <h2 class="section-title">Password</h2>
+    {{ field(password.current) }}
+    {{ field(password.password) }}
+    {{ field(password.confirm) }}
+    <button class="btn btn-primary" type="submit">Change the password</button>
+  </form>
 </div>
 {% endblock %}

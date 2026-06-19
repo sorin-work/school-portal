@@ -42,5 +42,13 @@ def edit():
         db.session.commit()
         flash("Saved.", "success")
         return redirect(url_for(".edit"))
+    if request.method == "POST" and request.form.get("form") == "password" and password.validate():
+        if not current_user.check_password(password.current.data):
+            password.current.errors.append("That is not your current password.")
+        else:
+            current_user.set_password(password.password.data)
+            db.session.commit()
+            flash("Password changed.", "success")
+            return redirect(url_for(".edit"))
     links = [link for link in _links() if link.can_view] if current_user.is_parent else []
     return render_template("account/edit.html", details=details, password=password, links=links)
