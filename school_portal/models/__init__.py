@@ -7,6 +7,7 @@ from .message import Message, MessageRead
 from .notification import Notification
 from .room import Room, RoomStaff
 from .security import PasswordToken
+from .setting import Setting
 from .user import Role, User
 
 __all__ = [
@@ -31,5 +32,6 @@ __all__ = [
     "Role",
     "Room",
     "RoomStaff",
+    "Setting",
     "User",
 ]
