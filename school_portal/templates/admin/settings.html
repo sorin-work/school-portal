@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% from "partials/forms.html" import field %}
+{% block title %}Settings · {{ school_name }}{% endblock %}
+{% block content %}
+<h1 class="page-title">Settings</h1>
+<form method="post" class="card grid max-w-2xl gap-4" novalidate>
+  {{ form.hidden_tag() }}
+  {{ field(form.school_name) }}
+  {{ field(form.summary_enabled) }}
+  {{ field(form.summary_time, hint="School time, on weekdays.") }}
+  {{ field(form.retention_days, hint="Applies to children marked as left from now on.") }}
+  {{ field(form.idle_timeout_minutes) }}
+  <div><button class="btn btn-primary" type="submit">Save</button></div>
+</form>
+{% endblock %}

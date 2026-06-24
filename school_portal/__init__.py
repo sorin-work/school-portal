@@ -77,6 +77,9 @@ def _register_blueprints(app: Flask) -> None:
     from .blueprints import account
 
     app.register_blueprint(account.bp)
+    from .blueprints import admin_settings
+
+    app.register_blueprint(admin_settings.bp)
 
 
 def _register_error_pages(app: Flask) -> None:
@@ -111,7 +114,9 @@ def _register_template_helpers(app: Flask) -> None:
 
     @app.context_processor
     def inject_globals():
-        school_name = app.config["SCHOOL_NAME"]
+        from . import settings
+
+        school_name = settings.get("school_name")
         values = {"school_name": school_name, "today": timeutil.today()}
         from flask import has_request_context
         from flask_login import current_user

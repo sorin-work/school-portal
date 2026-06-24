@@ -10,7 +10,7 @@ from datetime import date, time, timedelta
 
 from PIL import Image, ImageDraw
 
-from . import timeutil
+from . import settings, timeutil
 from .extensions import db
 from .models import (
     Absence,
@@ -175,6 +175,7 @@ def school_days(today: date, count: int) -> list[date]:
 def seed() -> None:
     rng = random.Random(42)
     today = timeutil.today()
+    settings.put("school_name", "Willow Brook Nursery and School")
 
     users: dict[str, User] = {}
     for email, name, role, _ in STAFF:

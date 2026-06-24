@@ -111,6 +111,8 @@ development; `.env.example` lists them.
 | `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_TLS` | empty, empty, `false` | Mail server sign-in |
 | `MAIL_FROM` | `School Portal <portal@example.com>` | Sender of every email |
 
+The school name, the daily summary time, the retention period and the idle
+timeout are set by an administrator under Settings and kept in the database.
 
 ## Development
 
