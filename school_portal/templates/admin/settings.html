@@ -12,4 +12,13 @@
   {{ field(form.idle_timeout_minutes) }}
   <div><button class="btn btn-primary" type="submit">Save</button></div>
 </form>
+<section class="card mt-6 max-w-2xl">
+  <h2 class="section-title">Background jobs</h2>
+  <p class="text-sm">Queued {{ jobs.get("queued", 0) }}, running {{ jobs.get("running", 0) }}, done {{ jobs.get("done", 0) }}, failed {{ jobs.get("failed", 0) }}.</p>
+  {% if failed %}
+  <ul class="mt-2 space-y-1 text-sm">
+    {% for job in failed %}<li><code>{{ job.kind }}</code> #{{ job.id }}, {{ job.attempts }} attempts: {{ (job.last_error or "").strip().splitlines()[-1] if job.last_error else "" }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+</section>
 {% endblock %}

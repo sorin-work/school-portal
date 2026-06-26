@@ -1,11 +1,13 @@
 from flask import Blueprint, flash, redirect, render_template, url_for
 from flask_wtf import FlaskForm
+from sqlalchemy import func, select
 from wtforms import BooleanField, IntegerField, StringField
 from wtforms.validators import DataRequired, Length, NumberRange, Regexp
 
 from .. import settings
 from ..decorators import admin_required
 from ..extensions import db
+from ..models import Job
 
 bp = Blueprint("admin_settings", __name__, url_prefix="/admin/settings")
 
@@ -46,5 +48,10 @@ def edit():
         db.session.commit()
         flash("Settings saved.", "success")
         return redirect(url_for(".edit"))
-    jobs, failed = {}, []
+    jobs = dict(db.session.execute(select(Job.status, func.count()).group_by(Job.status)).all())
+    failed = list(
+        db.session.scalars(
+            select(Job).where(Job.status == "failed").order_by(Job.id.desc()).limit(10)
+        )
+    )
     return render_template("admin/settings.html", form=form, jobs=jobs, failed=failed)
