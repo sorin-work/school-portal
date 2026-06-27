@@ -5,7 +5,7 @@ Here is what is in the diary for {{ day|date }}.
 
 {{ child.display_name }}
 {% for event in events %}
-- {{ event.occurred_at|time }} {{ event.label }}: {{ event.summary() }}
+- {{ event.occurred_at|time }} {{ event.label }}: {{ event.summary() }}{% if event.kind in ("incident", "accident") %} (please read and acknowledge it in the portal){% endif %}
 {% endfor %}
 {% endfor %}
 
