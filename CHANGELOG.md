@@ -2,6 +2,16 @@
 
 All notable changes, newest first. Dates are when the version was tagged.
 
+## 0.5.0 (2026-06-27)
+
+- Email through SMTP (Mailpit in development)
+- Password reset by email, and invitations for new accounts
+- A job queue in the database and a worker process
+- Settings page for the school name, the summary time, the retention period
+  and the idle timeout
+- Daily summary email to families, with a choice per child
+- Account page: name, phone, password
+
 ## 0.4.0 (2026-05-30)
 
 - Attendance register with arrival, going home and who collected
