@@ -44,6 +44,8 @@ PostgreSQL for everything, including the small job queue the worker runs.
   chat.
 - **Notifications** in the app for messages, reports, absences, notices and
   calendar events.
+- **Daily summary email** to each family at a time set by the school, with
+  what families may see from the day. Each carer can turn it off per child.
 
 ## Quick start
 

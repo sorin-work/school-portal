@@ -1,0 +1,13 @@
+Hello {{ user.first_name }},
+
+Here is what is in the diary for {{ day|date }}.
+{% for child, events in items %}
+
+{{ child.display_name }}
+{% for event in events %}
+- {{ event.occurred_at|time }} {{ event.label }}: {{ event.summary() }}
+{% endfor %}
+{% endfor %}
+
+The full diary, with photos, is in the portal: {{ config.BASE_URL }}
+You can turn these emails off under your account.

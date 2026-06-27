@@ -22,5 +22,16 @@
     {{ field(password.confirm) }}
     <button class="btn btn-primary" type="submit">Change the password</button>
   </form>
+  {% if links %}
+  <form method="post" action="{{ url_for('account.summaries') }}" class="card space-y-3">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <h2 class="section-title">Daily summary email</h2>
+    <p class="text-sm text-stone-600">At the end of each day, an email with what is in the diary.</p>
+    {% for link in links %}
+    <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="child_ids" value="{{ link.child_id }}" {% if link.receives_summary %}checked{% endif %}> {{ link.child.display_name }}</label>
+    {% endfor %}
+    <button class="btn btn-secondary" type="submit">Save</button>
+  </form>
+  {% endif %}
 </div>
 {% endblock %}

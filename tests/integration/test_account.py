@@ -38,3 +38,18 @@ def test_change_password_needs_the_current_one(client, app):
     )
     db.session.refresh(user)
     assert user.check_password("a new long password")
+
+
+def test_choose_which_children_get_a_summary(client, school):
+    from school_portal.models import Guardian
+
+    from ..conftest import link
+
+    link(school.sam, school.leon)
+    login(client, school.sam)
+    client.post("/account/summaries", data={"child_ids": [str(school.ava.id)]})
+    rows = db.session.scalars(db.select(Guardian).where(Guardian.user_id == school.sam.id)).all()
+    assert {g.child_id: g.receives_summary for g in rows} == {
+        school.ava.id: True,
+        school.leon.id: False,
+    }

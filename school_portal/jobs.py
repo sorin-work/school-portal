@@ -34,7 +34,10 @@ def handler(kind: str):
 
 def load_handlers() -> None:
     """Import the modules that register handlers."""
-    from . import mail  # noqa: F401
+    from . import (
+        mail,  # noqa: F401
+        summary,  # noqa: F401
+    )
 
 
 def enqueue(kind: str, payload: dict | None = None, *, run_at=None, unique_key=None) -> None:
@@ -107,6 +110,12 @@ def schedule(now=None) -> None:
     local = timeutil.local(now)
     day = local.date().isoformat()
     log.debug("scheduling for %s", day)
+    from . import settings
+
+    if settings.get_bool("summary_enabled"):
+        hour, minute = (int(part) for part in settings.get("summary_time").split(":"))
+        if (local.hour, local.minute) >= (hour, minute) and local.weekday() < 5:
+            enqueue("daily_summary", {"day": day}, unique_key=f"summary:{day}")
     # Housekeeping runs once a day, early in the morning.
     if local.hour >= 2:
         enqueue("housekeeping", {"day": day}, unique_key=f"housekeeping:{day}")

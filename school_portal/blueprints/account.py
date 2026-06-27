@@ -52,3 +52,14 @@ def edit():
             return redirect(url_for(".edit"))
     links = [link for link in _links() if link.can_view] if current_user.is_parent else []
     return render_template("account/edit.html", details=details, password=password, links=links)
+
+
+@bp.post("/summaries")
+@login_required
+def summaries():
+    wanted = {int(v) for v in request.form.getlist("child_ids") if v.isdigit()}
+    for link in _links():
+        link.receives_summary = link.child_id in wanted
+    db.session.commit()
+    flash("Email choices saved.", "success")
+    return redirect(url_for(".edit"))
