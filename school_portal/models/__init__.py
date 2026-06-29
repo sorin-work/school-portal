@@ -4,6 +4,7 @@ from .event import KINDS, CurriculumArea, Event, EventMedia
 from .job import Job
 from .media import Media
 from .message import Message, MessageRead
+from .notice import Notice
 from .notification import Notification
 from .room import Room, RoomStaff
 from .security import PasswordToken
@@ -27,6 +28,7 @@ __all__ = [
     "Media",
     "Message",
     "MessageRead",
+    "Notice",
     "Notification",
     "PasswordToken",
     "Role",
