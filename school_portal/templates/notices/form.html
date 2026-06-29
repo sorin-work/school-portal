@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% from "partials/forms.html" import field %}
+{% block title %}{{ "New notice" if new else notice.title }} · {{ school_name }}{% endblock %}
+{% block content %}
+<h1 class="page-title">{{ "New notice" if new else "Edit notice" }}</h1>
+<form method="post" class="card max-w-3xl space-y-4" novalidate>
+  {{ form.hidden_tag() }}
+  {{ field(form.title) }}
+  {{ field(form.body) }}
+  {{ field(form.rooms, hint="Choose none for the whole school (administrators only).") }}
+  <div class="grid gap-4 sm:grid-cols-2">
+    {{ field(form.expires_on) }}
+  </div>
+  <button class="btn btn-primary" type="submit">{{ "Publish" if new else "Save" }}</button>
+</form>
+{% endblock %}

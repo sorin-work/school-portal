@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ notice.title }} · {{ school_name }}{% endblock %}
+{% block content %}
+<article class="card max-w-3xl">
+  <h1 class="page-title">{{ notice.title }}</h1>
+  <p class="mb-4 text-sm text-stone-500">{{ notice.published_at|date }}{% if notice.author %}, {{ notice.author.name }}{% endif %}{% if notice.rooms %}, for {{ notice.rooms|map(attribute="name")|join(", ") }}{% endif %}</p>
+  <div class="whitespace-pre-line">{{ notice.body }}</div>
+</article>
+{% endblock %}

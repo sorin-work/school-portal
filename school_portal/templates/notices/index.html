@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Notices · {{ school_name }}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+  <h1 class="page-title mb-0">Notices</h1>
+  {% if may_post %}<a class="btn btn-primary" href="{{ url_for('notices.create') }}">New notice</a>{% endif %}
+</div>
+<ul class="space-y-3">
+  {% for notice in notices %}
+  <li class="card">
+    <a class="link text-lg font-medium" href="{{ url_for('notices.show', notice_id=notice.id) }}">{{ notice.title }}</a>
+    <p class="text-xs text-stone-500">{{ notice.published_at|date }}{% if notice.rooms %}, for {{ notice.rooms|map(attribute="name")|join(", ") }}{% else %}, for everyone{% endif %}</p>
+    <p class="mt-2 line-clamp-2 text-sm text-stone-700">{{ notice.body }}</p>
+  </li>
+  {% else %}
+  <li class="card text-stone-600">No notices.</li>
+  {% endfor %}
+</ul>
+{% endblock %}
