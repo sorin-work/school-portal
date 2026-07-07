@@ -9,6 +9,7 @@
   {% for notice in notices %}
   <li class="card">
     <a class="link text-lg font-medium" href="{{ url_for('notices.show', notice_id=notice.id) }}">{{ notice.title }}</a>
+    {% if notice.pinned %}<span class="badge badge-amber">Pinned</span>{% endif %}
     <p class="text-xs text-stone-500">{{ notice.published_at|date }}{% if notice.rooms %}, for {{ notice.rooms|map(attribute="name")|join(", ") }}{% else %}, for everyone{% endif %}</p>
     <p class="mt-2 line-clamp-2 text-sm text-stone-700">{{ notice.body }}</p>
   </li>

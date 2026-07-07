@@ -115,6 +115,7 @@ def _form(notice: Notice, *, new: bool):
             notice.title = form.title.data.strip()
             notice.body = form.body.data.strip()
             notice.expires_on = form.expires_on.data
+            notice.pinned = form.pinned.data
             notice.rooms = list(db.session.scalars(select(Room).where(Room.id.in_(chosen))))
             if new:
                 notice.author_id = current_user.id

@@ -10,6 +10,7 @@
   {{ field(form.rooms, hint="Choose none for the whole school (administrators only).") }}
   <div class="grid gap-4 sm:grid-cols-2">
     {{ field(form.expires_on) }}
+    {{ field(form.pinned) }}
   </div>
   <button class="btn btn-primary" type="submit">{{ "Publish" if new else "Save" }}</button>
 </form>
