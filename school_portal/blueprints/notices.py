@@ -92,6 +92,15 @@ def create():
     return _form(Notice(), new=True)
 
 
+@bp.route("/<int:notice_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit(notice_id: int):
+    notice = db.get_or_404(Notice, notice_id)
+    if not _may_edit(notice):
+        abort(403)
+    return _form(notice, new=False)
+
+
 def _form(notice: Notice, *, new: bool):
     form = NoticeForm(obj=notice)
     form.rooms.choices = _room_choices()
@@ -121,3 +130,15 @@ def _form(notice: Notice, *, new: bool):
             flash("Notice published." if new else "Notice saved.", "success")
             return redirect(url_for(".show", notice_id=notice.id))
     return render_template("notices/form.html", form=form, notice=notice, new=new)
+
+
+@bp.post("/<int:notice_id>/delete")
+@login_required
+def delete(notice_id: int):
+    notice = db.get_or_404(Notice, notice_id)
+    if not _may_edit(notice):
+        abort(403)
+    db.session.delete(notice)
+    db.session.commit()
+    flash("Notice removed.", "success")
+    return redirect(url_for(".index"))

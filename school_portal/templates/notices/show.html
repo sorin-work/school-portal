@@ -6,4 +6,13 @@
   <p class="mb-4 text-sm text-stone-500">{{ notice.published_at|date }}{% if notice.author %}, {{ notice.author.name }}{% endif %}{% if notice.rooms %}, for {{ notice.rooms|map(attribute="name")|join(", ") }}{% endif %}</p>
   <div class="whitespace-pre-line">{{ notice.body }}</div>
 </article>
+{% if may_edit %}
+<div class="mt-4 flex gap-2">
+  <a class="btn btn-secondary" href="{{ url_for('notices.edit', notice_id=notice.id) }}">Edit</a>
+  <form method="post" action="{{ url_for('notices.delete', notice_id=notice.id) }}" data-confirm="Remove this notice?">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn btn-danger" type="submit">Remove</button>
+  </form>
+</div>
+{% endif %}
 {% endblock %}
