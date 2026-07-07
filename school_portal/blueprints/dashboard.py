@@ -75,4 +75,7 @@ def _parent_context() -> dict:
         if ids
         else []
     )
+    from .notices import notices_for
+
+    context["notices"] = notices_for(current_user)[:3]
     return context

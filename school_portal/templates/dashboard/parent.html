@@ -34,4 +34,14 @@
   <p class="text-stone-600">Your account is not linked to a child yet. The school office can link it.</p>
   {% endif %}
 </section>
+{% if notices %}
+<section class="mb-6">
+  <h2 class="section-title">Notices</h2>
+  <ul class="space-y-2">
+    {% for notice in notices %}
+    <li class="card"><a class="link font-medium" href="{{ url_for('notices.show', notice_id=notice.id) }}">{{ notice.title }}</a> <span class="text-sm text-stone-500">{{ notice.published_at|date }}</span></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
 {% endblock %}
