@@ -23,6 +23,7 @@ from .models import (
     Guardian,
     Media,
     Message,
+    Notice,
     Role,
     Room,
     RoomStaff,
@@ -288,6 +289,7 @@ def seed() -> None:
     _seed_observations(today, rooms, children, users, areas)
     _seed_incidents(today, rooms, children, users)
     _seed_messages(today, children, users)
+    _seed_notices(today, rooms, users)
     db.session.commit()
 
 
@@ -635,3 +637,24 @@ def _seed_messages(today, children, users) -> None:
             created_at=base + timedelta(hours=1),
         )
     )
+
+
+def _seed_notices(today, rooms, users) -> None:
+    db.session.add(
+        Notice(
+            title="Wellies and waterproofs, please",
+            body=(
+                "We go outside in all weathers. Please send a named pair of wellies and a "
+                "waterproof suit that can stay at school."
+            ),
+            author_id=users["demo@example.com"].id,
+            pinned=True,
+        )
+    )
+    saplings = Notice(
+        title="Saplings: family photo week",
+        body="Next week we are making family books. Bring a printed family photo if you would like one included.",
+        author_id=users["amira.lead@example.com"].id,
+    )
+    saplings.rooms = [rooms["Saplings"]]
+    db.session.add(saplings)
