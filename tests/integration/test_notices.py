@@ -31,11 +31,14 @@ def test_room_notices_reach_only_that_room(client, school):
             "rooms": [str(school.saplings.id)],
         },
     )
+    notice = db.session.scalar(db.select(Notice))
     client.post("/logout")
     login(client, school.sam)
     assert b"Saplings photo week" in client.get("/notices/").data
     client.post("/logout")
     login(client, school.pat)
+    assert b"Saplings photo week" not in client.get("/notices/").data
+    assert client.get(f"/notices/{notice.id}").status_code == 404
     assert {n.user_id for n in db.session.scalars(db.select(Notification))} == {school.sam.id}
 
 

@@ -8,6 +8,7 @@ from wtforms.validators import DataRequired, Length, Optional
 from .. import access, timeutil
 from ..extensions import db
 from ..models import Child, Guardian, Notice, Room, User
+from ..models.notice import notice_rooms
 from ..notify import notify
 
 bp = Blueprint("notices", __name__, url_prefix="/notices")
@@ -30,6 +31,17 @@ def family_room_ids(user: User) -> set[int]:
 def notices_for(user: User) -> list[Notice]:
     query = select(Notice).order_by(Notice.pinned.desc(), Notice.published_at.desc())
     query = query.where(or_(Notice.expires_on.is_(None), Notice.expires_on >= timeutil.today()))
+    if not user.is_staff:
+        rooms = family_room_ids(user)
+        everyone = (
+            ~select(notice_rooms.c.notice_id).where(notice_rooms.c.notice_id == Notice.id).exists()
+        )
+        mine = (
+            select(notice_rooms.c.notice_id)
+            .where(notice_rooms.c.notice_id == Notice.id, notice_rooms.c.room_id.in_(rooms))
+            .exists()
+        )
+        query = query.where(or_(everyone, mine))
     return list(db.session.scalars(query.limit(100)))
 
 
