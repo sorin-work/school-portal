@@ -1,4 +1,5 @@
 from .attendance import ABSENCE_REASONS, Absence, Attendance
+from .calendar import EVENT_KINDS, Rsvp, SchoolEvent
 from .child import ACCESS_CHOICES, PHOTO_CONSENT_CHOICES, Child, Collector, Guardian
 from .event import KINDS, CurriculumArea, Event, EventMedia
 from .job import Job
@@ -14,6 +15,7 @@ from .user import Role, User
 __all__ = [
     "ABSENCE_REASONS",
     "ACCESS_CHOICES",
+    "EVENT_KINDS",
     "KINDS",
     "PHOTO_CONSENT_CHOICES",
     "Absence",
@@ -34,6 +36,8 @@ __all__ = [
     "Role",
     "Room",
     "RoomStaff",
+    "Rsvp",
+    "SchoolEvent",
     "Setting",
     "User",
 ]
