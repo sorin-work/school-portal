@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Calendar · {{ school_name }}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+  <h1 class="page-title mb-0">{% if past %}Past events{% else %}Calendar{% endif %}</h1>
+  <div class="flex gap-2">
+    {% if current_user.is_admin %}<a class="btn btn-primary" href="{{ url_for('calendar.create') }}">New event</a>{% endif %}
+  </div>
+</div>
+{% for month, items in months %}
+<section class="mb-6">
+  <h2 class="section-title">{{ month }}</h2>
+  <ul class="space-y-2">
+    {% for event in items %}
+    <li class="card flex flex-wrap items-baseline gap-3">
+      <span class="w-28 text-sm font-medium text-stone-600">{{ event.starts_at|date }}</span>
+      <a class="link font-medium" href="{{ url_for('calendar.show', event_id=event.id) }}">{{ event.title }}</a>
+      <span class="badge badge-slate">{{ event.kind_label }}</span>
+      {% if event.consent_required %}<span class="badge badge-amber">Consent form</span>{% elif event.rsvp_required %}<span class="badge badge-amber">Reply needed</span>{% endif %}
+      {% if event.rooms %}<span class="text-xs text-stone-500">{{ event.rooms|map(attribute="name")|join(", ") }}</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% else %}
+<p class="card text-stone-600">Nothing on the calendar.</p>
+{% endfor %}
+{% endblock %}

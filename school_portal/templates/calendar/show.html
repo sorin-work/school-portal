@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ event.title }} · {{ school_name }}{% endblock %}
+{% block content %}
+<article class="card mb-6 max-w-3xl">
+  <h1 class="page-title mb-1">{{ event.title }}</h1>
+  <p class="text-sm text-stone-600">
+    {{ event.kind_label }}, {{ event.starts_at|date }}{% if not event.all_day %} {{ event.starts_at|time }}{% if event.ends_at %} to {{ event.ends_at|time }}{% endif %}{% endif %}{% if event.location %}, {{ event.location }}{% endif %}
+  </p>
+  {% if event.rooms %}<p class="text-sm text-stone-600">For {{ event.rooms|map(attribute="name")|join(", ") }}</p>{% endif %}
+  {% if event.description %}<div class="mt-4 whitespace-pre-line">{{ event.description }}</div>{% endif %}
+  {% if event.respond_by %}<p class="mt-4 text-sm font-medium">Reply by {{ event.respond_by|date }}</p>{% endif %}
+  {% if current_user.is_admin %}<p class="mt-4"><a class="link" href="{{ url_for('calendar.edit', event_id=event.id) }}">Edit</a></p>{% endif %}
+</article>
+{% endblock %}

@@ -21,6 +21,7 @@
         {% endif %}
         <a class="nav-link" href="{{ url_for('messages.inbox') }}">Messages</a>
         <a class="nav-link" href="{{ url_for('notices.index') }}">Notices</a>
+        <a class="nav-link" href="{{ url_for('calendar.index') }}">Calendar</a>
         {% if current_user.is_admin %}
         <a class="nav-link" href="{{ url_for('admin_children.index') }}">Children</a>
         <a class="nav-link" href="{{ url_for('admin_rooms.index') }}">Room setup</a>

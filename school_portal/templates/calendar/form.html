@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "partials/forms.html" import field %}
+{% block title %}{{ "New event" if new else event.title }} · {{ school_name }}{% endblock %}
+{% block content %}
+<h1 class="page-title">{{ "New event" if new else "Edit event" }}</h1>
+<form method="post" class="card grid max-w-3xl gap-4 sm:grid-cols-2" novalidate>
+  {{ form.hidden_tag() }}
+  {{ field(form.title, class="sm:col-span-2") }}
+  {{ field(form.kind) }}
+  {{ field(form.day) }}
+  {{ field(form.start) }}
+  {{ field(form.end) }}
+  {{ field(form.all_day, class="sm:col-span-2") }}
+  {{ field(form.location, class="sm:col-span-2") }}
+  {{ field(form.description, class="sm:col-span-2") }}
+  {{ field(form.rooms, hint="Choose none for the whole school.") }}
+  {{ field(form.respond_by) }}
+  {{ field(form.rsvp_required, class="sm:col-span-2") }}
+  {{ field(form.consent_required, class="sm:col-span-2") }}
+  {{ field(form.consent_text, class="sm:col-span-2", hint="For example where the trip goes, how the children travel and what it costs.") }}
+  <div class="sm:col-span-2"><button class="btn btn-primary" type="submit">Save</button></div>
+</form>
+{% endblock %}
