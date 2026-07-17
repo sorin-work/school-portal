@@ -1,9 +1,11 @@
 """The school calendar: trips, closures and events, with replies and trip consent."""
 
+import csv
+import io
 from datetime import time
 from itertools import groupby
 
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask import Blueprint, Response, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 from flask_wtf import FlaskForm
 from sqlalchemy import or_, select
@@ -19,7 +21,7 @@ from wtforms import (
 from wtforms.validators import DataRequired, Length, Optional
 
 from .. import access, timeutil
-from ..decorators import admin_required
+from ..decorators import admin_required, staff_required
 from ..extensions import db
 from ..models import EVENT_KINDS, Child, Guardian, Room, Rsvp, SchoolEvent, User
 from ..models.calendar import school_event_rooms
@@ -172,6 +174,43 @@ def reply(event_id: int, child_id: int):
     db.session.commit()
     flash(f"Reply for {child.display_name} saved.", "success")
     return redirect(url_for(".show", event_id=event.id))
+
+
+def _cell(value) -> str:
+    text = "" if value is None else str(value)
+    return text
+
+
+@bp.get("/<int:event_id>/replies.csv")
+@staff_required
+def replies_csv(event_id: int):
+    event = event_or_404(event_id)
+    responses = {
+        r.child_id: r
+        for r in db.session.scalars(select(Rsvp).where(Rsvp.school_event_id == event.id))
+    }
+    out = io.StringIO()
+    writer = csv.writer(out)
+    writer.writerow(["Child", "Room", "Reply", "Consent", "Signed by", "Note", "Answered"])
+    for child in audience_children(event):
+        r = responses.get(child.id)
+        writer.writerow(
+            [
+                _cell(child.display_name),
+                _cell(child.room.name if child.room else ""),
+                "" if r is None else ("Coming" if r.attending else "Not coming"),
+                "" if r is None else ("Yes" if r.consent_given else "No"),
+                _cell(r.signed_name if r else ""),
+                _cell(r.note if r else ""),
+                timeutil.fmt_datetime(r.responded_at) if r else "",
+            ]
+        )
+    filename = f"replies-{event.id}.csv"
+    return Response(
+        out.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
 
 
 @bp.route("/new", methods=["GET", "POST"])

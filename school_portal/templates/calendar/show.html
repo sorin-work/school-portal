@@ -16,6 +16,7 @@
 <section class="card max-w-4xl overflow-x-auto">
   <div class="mb-2 flex items-center justify-between">
     <h2 class="section-title mb-0">Replies</h2>
+    <a class="link text-sm" href="{{ url_for('calendar.replies_csv', event_id=event.id) }}">Download CSV</a>
   </div>
   <table class="table">
     <thead><tr><th>Child</th><th>Reply</th>{% if event.consent_required %}<th>Consent</th>{% endif %}<th>Note</th></tr></thead>
