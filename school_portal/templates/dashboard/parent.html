@@ -44,4 +44,14 @@
   </ul>
 </section>
 {% endif %}
+{% if upcoming %}
+<section>
+  <h2 class="section-title">Coming up</h2>
+  <ul class="space-y-2">
+    {% for event in upcoming %}
+    <li class="card text-sm"><a class="link font-medium" href="{{ url_for('calendar.show', event_id=event.id) }}">{{ event.title }}</a> <span class="text-stone-500">{{ event.starts_at|date }}</span>{% if event.asks_parents %} <span class="badge badge-amber">Reply needed</span>{% endif %}</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
 {% endblock %}

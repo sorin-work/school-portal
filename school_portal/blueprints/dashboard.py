@@ -78,4 +78,7 @@ def _parent_context() -> dict:
     from .notices import notices_for
 
     context["notices"] = notices_for(current_user)[:3]
+    from .calendar import events_for
+
+    context["upcoming"] = [e for e in events_for(current_user) if e.starts_at >= timeutil.now()][:4]
     return context
