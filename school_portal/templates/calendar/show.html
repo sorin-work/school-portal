@@ -11,4 +11,58 @@
   {% if event.respond_by %}<p class="mt-4 text-sm font-medium">Reply by {{ event.respond_by|date }}</p>{% endif %}
   {% if current_user.is_admin %}<p class="mt-4"><a class="link" href="{{ url_for('calendar.edit', event_id=event.id) }}">Edit</a></p>{% endif %}
 </article>
+{% if event.asks_parents %}
+{% if current_user.is_staff %}
+<section class="card max-w-4xl overflow-x-auto">
+  <div class="mb-2 flex items-center justify-between">
+    <h2 class="section-title mb-0">Replies</h2>
+  </div>
+  <table class="table">
+    <thead><tr><th>Child</th><th>Reply</th>{% if event.consent_required %}<th>Consent</th>{% endif %}<th>Note</th></tr></thead>
+    <tbody>
+      {% for child in children %}
+      {% set r = responses.get(child.id) %}
+      <tr>
+        <td>{{ child.display_name }}<br><span class="text-xs text-stone-500">{{ child.room.name if child.room else "" }}</span></td>
+        <td>{% if r is none %}<span class="text-stone-500">No reply</span>{% elif r.attending %}Coming{% else %}Not coming{% endif %}</td>
+        {% if event.consent_required %}<td>{% if r and r.consent_given %}Given by {{ r.signed_name }}, {{ r.responded_at|date }}{% elif r and r.attending %}Missing{% endif %}</td>{% endif %}
+        <td>{{ r.note if r and r.note else "" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% else %}
+{% for child, can_act in mine %}
+{% set r = responses.get(child.id) %}
+<section class="card mb-4 max-w-3xl">
+  <h2 class="section-title">{{ child.display_name }}</h2>
+  {% if r %}<p class="mb-3 text-sm">Your reply: <strong>{{ "Coming" if r.attending else "Not coming" }}</strong>{% if r.consent_given %}, consent given by {{ r.signed_name }}{% endif %} ({{ r.responded_at|datetime }}).</p>{% endif %}
+  {% if not can_act %}
+  <p class="text-sm text-stone-600">Another parent or carer answers for {{ child.display_name }}.</p>
+  {% elif not open %}
+  <p class="text-sm text-stone-600">Replies have closed.</p>
+  {% else %}
+  <form method="post" action="{{ url_for('calendar.reply', event_id=event.id, child_id=child.id) }}" class="space-y-3">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="flex gap-4 text-sm">
+      <label class="flex items-center gap-2"><input type="radio" name="attending" value="yes" {% if r and r.attending %}checked{% endif %}> Coming</label>
+      <label class="flex items-center gap-2"><input type="radio" name="attending" value="no" {% if r and not r.attending %}checked{% endif %}> Not coming</label>
+    </div>
+    {% if event.consent_required %}
+    <div class="rounded border border-amber-200 bg-amber-50 p-3 text-sm">
+      <p class="whitespace-pre-line">{{ event.consent_text }}</p>
+      <label class="mt-2 flex items-center gap-2"><input type="checkbox" name="consent" value="yes" {% if r and r.consent_given %}checked{% endif %}> I give my consent</label>
+      <label class="label mt-2" for="signed-{{ child.id }}">Your full name, as a signature</label>
+      <input class="input" id="signed-{{ child.id }}" name="signed_name" value="{{ r.signed_name if r and r.signed_name else '' }}">
+    </div>
+    {% endif %}
+    <div><label class="label" for="note-{{ child.id }}">Note for the staff</label><input class="input" id="note-{{ child.id }}" name="note" value="{{ r.note if r and r.note else '' }}"></div>
+    <button class="btn btn-primary" type="submit">Send the reply</button>
+  </form>
+  {% endif %}
+</section>
+{% endfor %}
+{% endif %}
+{% endif %}
 {% endblock %}

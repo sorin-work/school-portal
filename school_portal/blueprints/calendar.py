@@ -3,7 +3,7 @@
 from datetime import time
 from itertools import groupby
 
-from flask import Blueprint, abort, flash, redirect, render_template, url_for
+from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 from flask_wtf import FlaskForm
 from sqlalchemy import or_, select
@@ -136,6 +136,42 @@ def _still_open(event: SchoolEvent) -> bool:
     if event.respond_by is not None:
         return timeutil.today() <= event.respond_by
     return event.starts_at > timeutil.now()
+
+
+@bp.post("/<int:event_id>/children/<int:child_id>/reply")
+@login_required
+def reply(event_id: int, child_id: int):
+    event = event_or_404(event_id)
+    child = access.child_or_404(child_id, act=True)
+    if not event.asks_parents or child.id not in {c.id for c in audience_children(event)}:
+        abort(404)
+    if not _still_open(event):
+        flash("Replies for this event have closed. Speak to the office.", "error")
+        return redirect(url_for(".show", event_id=event.id))
+    attending = request.form.get("attending")
+    if attending not in ("yes", "no"):
+        flash("Say whether your child is coming.", "error")
+        return redirect(url_for(".show", event_id=event.id))
+    consent = request.form.get("consent") == "yes"
+    signed = (request.form.get("signed_name") or "").strip()[:120]
+    if event.consent_required and attending == "yes" and (not consent or not signed):
+        flash("To say yes, tick the consent box and type your name.", "error")
+        return redirect(url_for(".show", event_id=event.id))
+    rsvp = db.session.scalar(
+        select(Rsvp).where(Rsvp.school_event_id == event.id, Rsvp.child_id == child.id)
+    )
+    if rsvp is None:
+        rsvp = Rsvp(school_event_id=event.id, child_id=child.id)
+        db.session.add(rsvp)
+    rsvp.attending = attending == "yes"
+    rsvp.consent_given = consent and rsvp.attending
+    rsvp.signed_name = signed if rsvp.consent_given else None
+    rsvp.note = (request.form.get("note") or "").strip()[:1000] or None
+    rsvp.responded_by_id = current_user.id
+    rsvp.responded_at = timeutil.now()
+    db.session.commit()
+    flash(f"Reply for {child.display_name} saved.", "success")
+    return redirect(url_for(".show", event_id=event.id))
 
 
 @bp.route("/new", methods=["GET", "POST"])
