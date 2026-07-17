@@ -102,7 +102,7 @@ def audience_children(event: SchoolEvent) -> list[Child]:
 @bp.get("/")
 @login_required
 def index():
-    past = False
+    past = request.args.get("past") == "1"
     events = events_for(current_user, past=past)
     months = [
         (month, list(items))

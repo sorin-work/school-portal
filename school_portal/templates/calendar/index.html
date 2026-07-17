@@ -4,6 +4,7 @@
 <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
   <h1 class="page-title mb-0">{% if past %}Past events{% else %}Calendar{% endif %}</h1>
   <div class="flex gap-2">
+    {% if past %}<a class="btn btn-secondary" href="{{ url_for('calendar.index') }}">Coming up</a>{% else %}<a class="btn btn-secondary" href="{{ url_for('calendar.index', past=1) }}">Past events</a>{% endif %}
     {% if current_user.is_admin %}<a class="btn btn-primary" href="{{ url_for('calendar.create') }}">New event</a>{% endif %}
   </div>
 </div>
