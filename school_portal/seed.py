@@ -27,6 +27,8 @@ from .models import (
     Role,
     Room,
     RoomStaff,
+    Rsvp,
+    SchoolEvent,
     User,
 )
 from .models.media import new_media_id
@@ -290,6 +292,7 @@ def seed() -> None:
     _seed_incidents(today, rooms, children, users)
     _seed_messages(today, children, users)
     _seed_notices(today, rooms, users)
+    _seed_calendar(today, rooms, children, users)
     db.session.commit()
 
 
@@ -658,3 +661,62 @@ def _seed_notices(today, rooms, users) -> None:
     )
     saplings.rooms = [rooms["Saplings"]]
     db.session.add(saplings)
+
+
+def _seed_calendar(today, rooms, children, users) -> None:
+    admin = users["demo@example.com"]
+    trip_day = today + timedelta(days=12)
+    trip = SchoolEvent(
+        title="Trip to Hollow Lane Farm",
+        kind="trip",
+        description="A morning at an invented city farm: feeding the goats and a tractor ride. Packed lunch provided.",
+        starts_at=timeutil.at(trip_day, time(9, 30)),
+        ends_at=timeutil.at(trip_day, time(14, 0)),
+        location="Hollow Lane Farm",
+        rsvp_required=True,
+        consent_required=True,
+        consent_text=(
+            "I give permission for my child to go to Hollow Lane Farm by coach with the school "
+            "staff, and for the staff to give first aid if needed. Cost: a voluntary contribution of 4 pounds."
+        ),
+        respond_by=trip_day - timedelta(days=4),
+        created_by_id=admin.id,
+    )
+    trip.rooms = [rooms["Oaks"], rooms["Class R"]]
+    db.session.add(trip)
+    db.session.flush()
+    db.session.add(
+        Rsvp(
+            school_event_id=trip.id,
+            child_id=children["Freya"].id,
+            attending=True,
+            consent_given=True,
+            signed_name="Lucia Castellano",
+            responded_by_id=children["Freya"].guardians[0].user_id,
+        )
+    )
+    inset = today + timedelta(days=20)
+    while inset.weekday() >= 5:
+        inset += timedelta(days=1)
+    db.session.add(
+        SchoolEvent(
+            title="Closed for staff training",
+            kind="closure",
+            description="The nursery and the school are closed for the day.",
+            starts_at=timeutil.at(inset, time(0, 0)),
+            ends_at=timeutil.at(inset + timedelta(days=1), time(0, 0)),
+            all_day=True,
+            created_by_id=admin.id,
+        )
+    )
+    db.session.add(
+        SchoolEvent(
+            title="Stay and play morning",
+            kind="event",
+            description="Families are welcome to stay for the first hour.",
+            starts_at=timeutil.at(today + timedelta(days=6), time(8, 30)),
+            ends_at=timeutil.at(today + timedelta(days=6), time(9, 30)),
+            rsvp_required=True,
+            created_by_id=admin.id,
+        )
+    )
