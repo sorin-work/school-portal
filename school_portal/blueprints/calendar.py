@@ -2,7 +2,7 @@
 
 import csv
 import io
-from datetime import time
+from datetime import time, timedelta
 from itertools import groupby
 
 from flask import Blueprint, Response, abort, flash, redirect, render_template, request, url_for
@@ -257,6 +257,8 @@ def _form(event: SchoolEvent, *, new: bool):
             event.title = form.title.data.strip()
             event.kind = form.kind.data
             event.starts_at, event.ends_at, event.all_day = starts, ends, all_day
+            if all_day:
+                event.ends_at = timeutil.at(day + timedelta(days=1), time(0, 0))
             event.location = form.location.data or None
             event.description = form.description.data or None
             event.rsvp_required = form.rsvp_required.data or form.consent_required.data
