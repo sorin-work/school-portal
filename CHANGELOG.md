@@ -2,6 +2,15 @@
 
 All notable changes, newest first. Dates are when the version was tagged.
 
+## 0.6.0 (2026-07-25)
+
+- Notices for the whole school or for some rooms; room leads post to their
+  own rooms
+- Calendar of trips, closures and events, with replies, trip consent forms,
+  a reply-by date and a CSV of the replies
+- Fix: parents saw the notices of every room
+- Fix: CSV cells that start like a formula are quoted
+
 ## 0.5.0 (2026-06-27)
 
 - Email through SMTP (Mailpit in development)
