@@ -106,6 +106,7 @@ def test_staff_download_the_replies(client, school):
     assert response.mimetype == "text/csv"
     text = response.data.decode()
     assert "Ava Reid" in text and "Leon Kowalczyk" in text
+    assert "'=HYPERLINK" in text
     client.post("/logout")
     login(client, school.sam)
     assert client.get(f"/calendar/{trip.id}/replies.csv").status_code == 403

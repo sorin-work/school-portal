@@ -178,6 +178,9 @@ def reply(event_id: int, child_id: int):
 
 def _cell(value) -> str:
     text = "" if value is None else str(value)
+    # A cell starting with one of these is run as a formula by spreadsheets.
+    if text[:1] in ("=", "+", "-", "@", "\t", "\r"):
+        text = "'" + text
     return text
 
 
