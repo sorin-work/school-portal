@@ -5,7 +5,7 @@ from flask_wtf.file import FileField
 from wtforms import StringField
 from wtforms.validators import DataRequired, Length, Optional
 
-from .. import access
+from .. import access, audit
 from ..extensions import db
 from ..models import Collector
 from ..uploads import UploadError, save_image
@@ -26,6 +26,8 @@ class CollectorForm(FlaskForm):
 def show(child_id: int):
     child = access.child_or_404(child_id)
     show_medical = access.can_see_medical(current_user, child)
+    if current_user.is_staff:
+        audit.record_view(child)
     guardians = child.guardians if current_user.is_staff else []
     collectors = [c for c in db.session.query(Collector).filter_by(child_id=child.id) if c.active]
     form = CollectorForm() if current_user.is_staff else None
@@ -65,6 +67,7 @@ def add_collector(child_id: int):
             flash(str(exc), "error")
             return redirect(url_for(".show", child_id=child.id) + "#collectors")
     db.session.add(collector)
+    audit.record("collector.added", child, target=collector.name)
     db.session.commit()
     flash(f"{collector.name} can now collect {child.display_name}.", "success")
     return redirect(url_for(".show", child_id=child.id) + "#collectors")
@@ -80,6 +83,7 @@ def remove_collector(child_id: int, collector_id: int):
     if collector is None or collector.child_id != child.id:
         abort(404)
     collector.active = False
+    audit.record("collector.removed", child, target=collector.name)
     db.session.commit()
     flash(f"{collector.name} removed from the collectors.", "success")
     return redirect(url_for(".show", child_id=child.id) + "#collectors")

@@ -86,6 +86,9 @@ def _register_blueprints(app: Flask) -> None:
     from .blueprints import admin_settings
 
     app.register_blueprint(admin_settings.bp)
+    from .blueprints import admin_audit
+
+    app.register_blueprint(admin_audit.bp)
 
 
 def _register_error_pages(app: Flask) -> None:

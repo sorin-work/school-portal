@@ -4,7 +4,7 @@ from sqlalchemy import func, or_, select
 from wtforms import BooleanField, DateField, EmailField, SelectField, StringField, TextAreaField
 from wtforms.validators import DataRequired, Email, Length, Optional
 
-from .. import tokens
+from .. import audit, tokens
 from ..decorators import admin_required
 from ..extensions import db
 from ..mail import queue_email
@@ -83,6 +83,7 @@ def create():
         _apply(form, child)
         db.session.add(child)
         db.session.flush()
+        audit.record("child.created", child)
         db.session.commit()
         flash(f"{child.display_name} added.", "success")
         return redirect(url_for(".edit", child_id=child.id))
@@ -129,9 +130,11 @@ def edit(child_id: int):
     if form.validate_on_submit():
         changed = _apply(form, child)
         if changed:
+            audit.record("child.updated", child, fields=changed)
             db.session.commit()
             flash("Saved.", "success")
         return redirect(url_for(".edit", child_id=child.id))
+    audit.record_view(child, "admin")
     return render_template(
         "admin/child_form.html",
         form=form,
@@ -174,6 +177,7 @@ def add_guardian(child_id: int):
     )
     db.session.add(link)
     db.session.flush()
+    audit.record("guardian.added", child, target=f"user:{user.id}", access=link.access)
     db.session.commit()
     flash(f"{user.name} linked to {child.display_name}.", "success")
     return redirect(url_for(".edit", child_id=child.id) + "#guardians")
@@ -203,6 +207,7 @@ def remove_guardian(child_id: int, guardian_id: int):
     link = db.session.get(Guardian, guardian_id)
     if link is None or link.child_id != child_id:
         abort(404)
+    audit.record("guardian.removed", link.child, target=f"user:{link.user_id}")
     db.session.delete(link)
     db.session.commit()
     flash("Guardian removed from this child.", "success")

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Audit log · {{ school_name }}{% endblock %}
+{% block content %}
+<h1 class="page-title">Audit log{% if child %}: {{ child.display_name }}{% elif child_id %}: child #{{ child_id }}{% endif %}</h1>
+<div class="card overflow-x-auto">
+  <table class="table">
+    <thead><tr><th>When</th><th>Who</th><th>What</th><th>Child</th><th>Details</th></tr></thead>
+    <tbody>
+      {% for entry in entries %}
+      <tr>
+        <td class="whitespace-nowrap">{{ entry.at|datetime }}</td>
+        <td>{{ entry.actor.name if entry.actor else "System" }}</td>
+        <td><code>{{ entry.action }}</code>{% if entry.target %} {{ entry.target }}{% endif %}</td>
+        <td>{% if entry.child_id %}<a class="link" href="{{ url_for('admin_audit.index', child=entry.child_id) }}">{{ names.get(entry.child_id, "#" ~ entry.child_id) }}</a>{% endif %}</td>
+        <td class="text-xs text-stone-600">{% for key, value in entry.details.items() %}{{ key }}: {{ value }}{% if not loop.last %}; {% endif %}{% endfor %}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="text-stone-600">Nothing recorded.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if more %}<p class="mt-4"><a class="link" href="{{ url_for('admin_audit.index', child=child_id, action=action, before=entries[-1].id) }}">Older entries</a></p>{% endif %}
+{% endblock %}

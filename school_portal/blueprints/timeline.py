@@ -6,7 +6,7 @@ from flask import Blueprint, abort, flash, redirect, render_template, request, u
 from flask_login import current_user, login_required
 from sqlalchemy import select
 
-from .. import access, photos, timeutil
+from .. import access, audit, photos, timeutil
 from ..events import day_events
 from ..extensions import db
 from ..models import Absence, Attendance, Event
@@ -44,6 +44,8 @@ def child_day(child_id: int):
     if day > timeutil.today():
         day = timeutil.today()
     events = visible_events(child, day)
+    if current_user.is_staff:
+        audit.record_view(child, "diary")
     context = {}
     context["attendance"] = db.session.scalar(
         select(Attendance).where(Attendance.child_id == child.id, Attendance.day == day)
@@ -136,6 +138,7 @@ def edit_event(event_id: int):
             event.visibility = visibility
             event.updated_at = timeutil.now()
             event.updated_by_id = current_user.id
+            audit.record("event.edited", child, target=f"event:{event.id}")
             db.session.commit()
             flash("Saved.", "success")
             return redirect(back)
@@ -156,6 +159,7 @@ def delete_event(event_id: int):
     child = access.child_or_404(event.child_id)
     event.deleted_at = timeutil.now()
     event.updated_by_id = current_user.id
+    audit.record("event.deleted", child, target=f"event:{event.id}", kind=event.kind)
     db.session.commit()
     flash("Removed from the diary.", "success")
     return redirect(

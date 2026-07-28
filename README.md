@@ -50,6 +50,8 @@ PostgreSQL for everything, including the small job queue the worker runs.
   forms signed by typing a name, a reply-by date and a CSV of the replies.
 - **Daily summary email** to each family at a time set by the school, with
   what families may see from the day. Each carer can turn it off per child.
+- **Audit log** of who viewed a child's profile or diary and who changed the
+  record, links or access.
 
 ## Quick start
 

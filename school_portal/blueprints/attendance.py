@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from wtforms import DateField, SelectField, TextAreaField
 from wtforms.validators import DataRequired, Length, Optional
 
-from .. import access, timeutil
+from .. import access, audit, timeutil
 from ..decorators import staff_required
 from ..events import child_days
 from ..extensions import db
@@ -212,6 +212,7 @@ def cancel_absence(child_id: int, absence_id: int):
     if absence is None or absence.child_id != child.id:
         abort(404)
     absence.cancelled_at = timeutil.now()
+    audit.record("absence.cancelled", child, target=f"absence:{absence.id}")
     db.session.commit()
     flash("Absence cancelled.", "success")
     return redirect(url_for(".report_absence", child_id=child.id))
