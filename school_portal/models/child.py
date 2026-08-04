@@ -83,10 +83,18 @@ class Guardian(db.Model):
     relationship_label: Mapped[str] = mapped_column("relationship", String(40), default="Parent")
     access: Mapped[str] = mapped_column(String(16), default="full")
     receives_summary: Mapped[bool] = mapped_column(default=True)
+    # Why access was limited, for example a court order. Only administrators
+    # see this and only they can change the access level.
+    restriction_reason: Mapped[str | None] = mapped_column(Text)
+    restricted_by_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
+    restricted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     child: Mapped[Child] = relationship(back_populates="guardians")
     user = relationship("User", foreign_keys=[user_id])
+    restricted_by = relationship("User", foreign_keys=[restricted_by_id])
 
     @property
     def can_view(self) -> bool:
