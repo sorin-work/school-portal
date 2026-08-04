@@ -20,6 +20,8 @@ def index():
         query = query.where(AuditEntry.child_id == child_id)
         child = db.session.get(Child, child_id)
     action = request.args.get("action", "").strip()
+    if action:
+        query = query.where(AuditEntry.action.startswith(action))
     before = request.args.get("before", type=int)
     if before:
         query = query.where(AuditEntry.id < before)
