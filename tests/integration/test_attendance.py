@@ -63,6 +63,17 @@ def test_a_second_tap_does_not_make_a_second_row(client, school):
     assert row.checked_out_at is None
 
 
+def test_a_guardian_without_access_is_not_offered_at_collection(client, school):
+    excluded = make_user("parent", email="excluded@example.com", name="Mark Excluded")
+    link(excluded, school.ava, access="none")
+    login(client, school.amy)
+    base = f"/rooms/{school.saplings.id}/children/{school.ava.id}"
+    client.post(f"{base}/check-in")
+    assert b"Mark Excluded" not in client.get(f"{base}/check-out").data
+    response = client.post(f"{base}/check-out", data={"collector": f"g:{excluded.id}"})
+    assert b"Say who collected" in response.data
+
+
 def test_collectors_with_photos(client, school):
     import io
 

@@ -74,6 +74,8 @@ def collector_choices(child: Child) -> list[tuple[str, str]]:
     """Guardians who may collect, then the child's active collectors."""
     choices = []
     for link in child.guardians:
+        if link.access == "none":
+            continue
         choices.append((f"g:{link.user_id}", f"{link.user.name} ({link.relationship_label})"))
     query = select(Collector).where(Collector.child_id == child.id)
     query = query.where(Collector.active)
