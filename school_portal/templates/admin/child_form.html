@@ -39,8 +39,10 @@
         <td>{{ link.relationship_label }}</td>
         <td>
           {% if link.access == "full" %}<span class="badge badge-emerald">Full</span>{% elif link.access == "read_only" %}<span class="badge badge-amber">Timeline only</span>{% else %}<span class="badge badge-red">No access</span>{% endif %}
+          {% if link.restriction_reason %}<p class="mt-1 text-xs text-stone-600">{{ link.restriction_reason }} (recorded by {{ link.restricted_by.name if link.restricted_by else "unknown" }}, {{ link.restricted_at|date }})</p>{% endif %}
         </td>
         <td class="whitespace-nowrap">
+          <a class="link text-sm" href="{{ url_for('admin_children.guardian_access', child_id=child.id, guardian_id=link.id) }}">Change access</a>
           <form method="post" action="{{ url_for('admin_children.remove_guardian', child_id=child.id, guardian_id=link.id) }}" class="inline" data-confirm="Remove {{ link.user.name }} from {{ child.display_name }}?">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="link text-sm text-red-700" type="submit">Remove</button>
@@ -58,6 +60,7 @@
     {{ field(guardian_form.name, hint="Only needed when the address has no account; an invitation is sent.") }}
     {{ field(guardian_form.relationship) }}
     {{ field(guardian_form.access) }}
+    {{ field(guardian_form.restriction_reason, class="sm:col-span-2", hint="Required for timeline only or no access, for example the court order's reference.") }}
     <div class="sm:col-span-2"><button class="btn btn-secondary" type="submit">Link a parent or carer</button></div>
   </form>
 </section>

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% from "partials/forms.html" import field %}
+{% block title %}Access · {{ school_name }}{% endblock %}
+{% block content %}
+<h1 class="page-title">{{ link.user.name }} and {{ link.child.display_name }}</h1>
+<form method="post" class="card max-w-xl space-y-4" novalidate>
+  {{ form.hidden_tag() }}
+  {{ field(form.access) }}
+  {{ field(form.restriction_reason, hint="Required for anything but full access. Only administrators see it.") }}
+  {{ field(form.receives_summary) }}
+  {% if link.restricted_at %}<p class="text-sm text-stone-600">Last limited by {{ link.restricted_by.name if link.restricted_by else "unknown" }} on {{ link.restricted_at|datetime }}.</p>{% endif %}
+  <div class="flex gap-2">
+    <button class="btn btn-primary" type="submit">Save</button>
+    <a class="btn btn-secondary" href="{{ url_for('admin_children.edit', child_id=link.child_id) }}#guardians">Cancel</a>
+  </div>
+</form>
+{% endblock %}

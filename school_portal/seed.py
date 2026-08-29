@@ -245,6 +245,9 @@ def seed() -> None:
                 relationship_label="Grandparent",
                 access="read_only",
                 receives_summary=False,
+                restriction_reason="Family asked for diary access only; mum handles messages.",
+                restricted_by=users["demo@example.com"],
+                restricted_at=timeutil.now() - timedelta(days=40),
             )
         )
         db.session.add(
@@ -254,6 +257,12 @@ def seed() -> None:
                 relationship_label="Father",
                 access="none",
                 receives_summary=False,
+                restriction_reason=(
+                    "Court order (invented case ref. FD25-0417): no information and no "
+                    "collection. Copy of the order in the office safe."
+                ),
+                restricted_by=users["demo@example.com"],
+                restricted_at=timeutil.now() - timedelta(days=60),
             )
         )
     priya = parent("parent2@example.com", "Priya Nair", "07700 900789")

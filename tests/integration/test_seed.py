@@ -19,3 +19,7 @@ def test_demo_school_and_logins(client, app):
     login(client, parent, "demo-password")
     page = client.get("/").data
     assert b"Ava Reid" in page and b"Noah Reid" in page
+    client.post("/logout")
+    restricted = db.session.scalar(select(User).where(User.email == "restricted@example.com"))
+    login(client, restricted, "demo-password")
+    assert b"not linked to a child" in client.get("/").data

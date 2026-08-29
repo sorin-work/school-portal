@@ -1,10 +1,11 @@
 from flask import Blueprint, abort, current_app, flash, redirect, render_template, request, url_for
+from flask_login import current_user
 from flask_wtf import FlaskForm
 from sqlalchemy import func, or_, select
 from wtforms import BooleanField, DateField, EmailField, SelectField, StringField, TextAreaField
 from wtforms.validators import DataRequired, Email, Length, Optional
 
-from .. import audit, tokens
+from .. import audit, timeutil, tokens
 from ..decorators import admin_required
 from ..extensions import db
 from ..mail import queue_email
@@ -33,6 +34,17 @@ class GuardianForm(FlaskForm):
     name = StringField("Name (for a new account)", validators=[Optional(), Length(max=120)])
     relationship = StringField("Relationship", default="Parent", validators=[Length(max=40)])
     access = SelectField("Access", choices=ACCESS_CHOICES, default="full")
+    restriction_reason = TextAreaField(
+        "Reason for limiting access", validators=[Optional(), Length(max=2000)]
+    )
+
+
+class AccessForm(FlaskForm):
+    access = SelectField("Access", choices=ACCESS_CHOICES)
+    restriction_reason = TextAreaField(
+        "Reason for limiting access", validators=[Optional(), Length(max=2000)]
+    )
+    receives_summary = BooleanField("Daily summary email")
 
 
 @bp.get("/")
@@ -151,6 +163,9 @@ def add_guardian(child_id: int):
     if not form.validate_on_submit():
         flash("Check the guardian's details: " + _first_error(form), "error")
         return redirect(url_for(".edit", child_id=child.id) + "#guardians")
+    if form.access.data != "full" and not (form.restriction_reason.data or "").strip():
+        flash("Give a reason when a guardian's access is limited.", "error")
+        return redirect(url_for(".edit", child_id=child.id) + "#guardians")
     email = form.email.data.strip().lower()
     user = db.session.scalar(select(User).where(func.lower(User.email) == email))
     if user is None:
@@ -175,6 +190,7 @@ def add_guardian(child_id: int):
         relationship_label=form.relationship.data.strip() or "Parent",
         access=form.access.data,
     )
+    _record_restriction(link, form.access.data, form.restriction_reason.data)
     db.session.add(link)
     db.session.flush()
     audit.record("guardian.added", child, target=f"user:{user.id}", access=link.access)
@@ -199,6 +215,50 @@ def _send_invite(user: User) -> None:
         user=user,
         link=current_app.config["BASE_URL"] + url_for("auth.reset", token=token),
     )
+
+
+def _record_restriction(link: Guardian, access: str, reason: str | None) -> bool:
+    """Keep who limited a link and why. Returns False when a reason is missing."""
+    reason = (reason or "").strip()
+    if access == "full":
+        link.restriction_reason = None
+        link.restricted_by_id = None
+        link.restricted_at = None
+        return True
+    if not reason:
+        return False
+    if link.access != access or link.restriction_reason != reason or link.restricted_at is None:
+        link.restriction_reason = reason
+        link.restricted_by_id = current_user.id
+        link.restricted_at = timeutil.now()
+    return True
+
+
+@bp.route("/<int:child_id>/guardians/<int:guardian_id>", methods=["GET", "POST"])
+@admin_required
+def guardian_access(child_id: int, guardian_id: int):
+    link = db.session.get(Guardian, guardian_id)
+    if link is None or link.child_id != child_id:
+        abort(404)
+    form = AccessForm(obj=link)
+    if form.validate_on_submit():
+        before = link.access
+        if not _record_restriction(link, form.access.data, form.restriction_reason.data):
+            form.restriction_reason.errors.append("Give a reason when access is limited.")
+        else:
+            link.access = form.access.data
+            link.receives_summary = form.receives_summary.data
+            audit.record(
+                "guardian.access_changed",
+                link.child,
+                target=f"user:{link.user_id}",
+                before=before,
+                after=link.access,
+            )
+            db.session.commit()
+            flash("Access saved.", "success")
+            return redirect(url_for(".edit", child_id=child_id) + "#guardians")
+    return render_template("admin/guardian_access.html", form=form, link=link)
 
 
 @bp.post("/<int:child_id>/guardians/<int:guardian_id>/remove")

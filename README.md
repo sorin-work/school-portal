@@ -13,6 +13,11 @@ PostgreSQL for everything, including the small job queue the worker runs.
 - **Roles.** Administrators, staff and parents or carers. Staff work in one or
   more rooms and can be the room lead or a child's key person. A child can
   have several parents and carers.
+- **Limited guardians.** Each link between a carer and a child has an access
+  level: full, timeline only (no messages, absence reports or forms) or none.
+  An administrator records why a link was limited, for example a court order,
+  and who did it and when. Staff see on the child's profile that a person has
+  no access and must not be given information or the child.
 - **Rooms and children.** Nursery rooms and school classes, children with
   dietary needs, allergies and medical notes. Medical notes are staff only
   unless the family is meant to see them. Allergies show on the child's tile
