@@ -2,6 +2,14 @@
 
 All notable changes, newest first. Dates are when the version was tagged.
 
+## 0.7.0 (2026-09-05)
+
+- Audit log of who viewed a child's profile or diary and who changed the
+  record, links, access or diary entries
+- Administrators record why a guardian's access was limited, by whom and
+  when
+- Guardians with no access are never offered at going-home time
+
 ## 0.6.0 (2026-07-25)
 
 - Notices for the whole school or for some rooms; room leads post to their
