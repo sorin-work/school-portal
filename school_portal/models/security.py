@@ -23,3 +23,13 @@ class PasswordToken(db.Model):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User")
+
+
+class LoginAttempt(db.Model):
+    __tablename__ = "login_attempts"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(String(254), index=True)
+    ip: Mapped[str] = mapped_column(String(64), index=True)
+    success: Mapped[bool] = mapped_column(default=False)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

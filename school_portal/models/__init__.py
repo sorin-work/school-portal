@@ -9,7 +9,7 @@ from .message import Message, MessageRead
 from .notice import Notice
 from .notification import Notification
 from .room import Room, RoomStaff
-from .security import PasswordToken
+from .security import LoginAttempt, PasswordToken
 from .setting import Setting
 from .user import Role, User
 
@@ -29,6 +29,7 @@ __all__ = [
     "EventMedia",
     "Guardian",
     "Job",
+    "LoginAttempt",
     "Media",
     "Message",
     "MessageRead",
