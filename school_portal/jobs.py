@@ -126,6 +126,9 @@ def schedule(now=None) -> None:
 def housekeeping(payload: dict) -> None:
     cutoff = timeutil.now() - timedelta(days=30)
     db.session.execute(Job.__table__.delete().where(Job.status == "done", Job.finished_at < cutoff))
+    from . import ratelimit
+
+    ratelimit.prune()
 
 
 def work_forever(poll_seconds: float = 5.0) -> None:  # pragma: no cover - runs in the worker

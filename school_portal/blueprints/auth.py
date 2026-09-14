@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 from wtforms import EmailField, PasswordField
 from wtforms.validators import DataRequired, Email, EqualTo, Length
 
-from .. import timeutil, tokens
+from .. import ratelimit, timeutil, tokens
 from ..extensions import db
 from ..mail import queue_email
 from ..models import User
@@ -60,10 +60,15 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         email = normalise_email(form.email.data)
+        if ratelimit.login_blocked(email, client_ip()):
+            flash("Too many failed attempts. Wait a few minutes and try again.", "error")
+            return render_template("auth/login.html", form=form, demo=_demo()), 429
         user = find_user(email)
         if user is None or not user.active or not user.check_password(form.password.data):
+            ratelimit.record(email, client_ip(), success=False)
             flash("That email and password do not match an account.", "error")
             return render_template("auth/login.html", form=form, demo=_demo()), 401
+        ratelimit.record(email, client_ip(), success=True)
         user.last_login_at = timeutil.now()
         db.session.commit()
         login_user(user)

@@ -123,6 +123,8 @@ development; `.env.example` lists them.
 | `SMTP_HOST`, `SMTP_PORT` | `127.0.0.1`, `1025` | Outgoing mail |
 | `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_TLS` | empty, empty, `false` | Mail server sign-in |
 | `MAIL_FROM` | `School Portal <portal@example.com>` | Sender of every email |
+| `LOGIN_MAX_FAILURES` | `5` | Failed sign-ins per address before a pause |
+| `LOGIN_WINDOW_MINUTES` | `15` | How long failures count |
 
 The school name, the daily summary time, the retention period and the idle
 timeout are set by an administrator under Settings and kept in the database.

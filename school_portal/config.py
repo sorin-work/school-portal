@@ -46,6 +46,8 @@ class Config:
         self.SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
         self.SMTP_TLS = _bool("SMTP_TLS")
         self.MAIL_FROM = os.environ.get("MAIL_FROM", "School Portal <portal@example.com>")
+        self.LOGIN_MAX_FAILURES = _int("LOGIN_MAX_FAILURES", 5)
+        self.LOGIN_WINDOW_MINUTES = _int("LOGIN_WINDOW_MINUTES", 15)
         self.TESTING = False
 
     @property
