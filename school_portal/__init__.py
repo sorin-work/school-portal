@@ -23,7 +23,15 @@ def create_app(overrides: dict | None = None) -> Flask:
 
     @login_manager.user_loader
     def load_user(user_id: str):
-        return db.session.get(models.User, int(user_id))
+        # The id in the session is "<id>:<session version>"; an old version
+        # means the password changed or the user signed out everywhere.
+        raw_id, _, version = user_id.partition(":")
+        if not raw_id.isdigit() or not version.isdigit():
+            return None
+        user = db.session.get(models.User, int(raw_id))
+        if user is None or user.session_version != int(version):
+            return None
+        return user
 
     _register_blueprints(app)
     _register_template_helpers(app)
@@ -31,6 +39,9 @@ def create_app(overrides: dict | None = None) -> Flask:
     from .cli import register_cli
 
     register_cli(app)
+    from .sessions import init_sessions
+
+    init_sessions(app)
     return app
 
 

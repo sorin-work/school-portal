@@ -72,6 +72,9 @@ def login():
         user.last_login_at = timeutil.now()
         db.session.commit()
         login_user(user)
+        from ..sessions import start_session
+
+        start_session()
         target = request.args.get("next", "")
         # Only follow local paths, never another site.
         if not target.startswith("/") or target.startswith("//"):
@@ -89,6 +92,9 @@ def _demo():
 @bp.post("/logout")
 @login_required
 def logout():
+    from flask import session
+
+    session.clear()
     logout_user()
     flash("You are signed out.", "info")
     return redirect(url_for("auth.login"))
@@ -125,6 +131,7 @@ def reset(token: str):
     if form.validate_on_submit():
         user = record.user
         user.set_password(form.password.data)
+        user.session_version += 1
         record.used_at = timeutil.now()
         tokens.revoke_others(user, record)
         db.session.commit()

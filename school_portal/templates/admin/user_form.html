@@ -21,6 +21,10 @@
     <button class="btn btn-secondary" type="submit">Send the invitation again</button>
   </form>
   {% endif %}
+  <form method="post" action="{{ url_for('admin_users.sign_out_everywhere', user_id=user.id) }}" data-confirm="Sign {{ user.name }} out on every device?">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn btn-secondary" type="submit">Sign out everywhere</button>
+  </form>
 </div>
 {% if links %}
 <section class="card mt-6 max-w-2xl">

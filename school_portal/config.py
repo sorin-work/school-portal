@@ -6,6 +6,7 @@ APP_ENV says production.
 """
 
 import os
+from datetime import timedelta
 
 
 def _bool(name: str, default: bool = False) -> bool:
@@ -46,6 +47,12 @@ class Config:
         self.SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
         self.SMTP_TLS = _bool("SMTP_TLS")
         self.MAIL_FROM = os.environ.get("MAIL_FROM", "School Portal <portal@example.com>")
+        self.SESSION_COOKIE_HTTPONLY = True
+        self.SESSION_COOKIE_SAMESITE = "Lax"
+        self.SESSION_COOKIE_SECURE = _bool("SESSION_COOKIE_SECURE")
+        self.REMEMBER_COOKIE_DURATION = timedelta(seconds=0)
+        self.SESSION_MAX_HOURS = _int("SESSION_MAX_HOURS", 12)
+        self.PERMANENT_SESSION_LIFETIME = timedelta(hours=self.SESSION_MAX_HOURS)
         self.LOGIN_MAX_FAILURES = _int("LOGIN_MAX_FAILURES", 5)
         self.LOGIN_WINDOW_MINUTES = _int("LOGIN_WINDOW_MINUTES", 15)
         self.TESTING = False

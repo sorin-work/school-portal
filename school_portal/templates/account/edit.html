@@ -33,5 +33,11 @@
     <button class="btn btn-secondary" type="submit">Save</button>
   </form>
   {% endif %}
+  <form method="post" action="{{ url_for('account.sign_out_everywhere') }}" class="card space-y-3" data-confirm="Sign out on every device, this one too?">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <h2 class="section-title">Devices</h2>
+    <p class="text-sm text-stone-600">Lost a phone, or signed in on a shared computer? Sign out everywhere.</p>
+    <button class="btn btn-secondary" type="submit">Sign out everywhere</button>
+  </form>
 </div>
 {% endblock %}

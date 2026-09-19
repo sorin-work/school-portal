@@ -1,5 +1,5 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
-from flask_login import current_user, login_required
+from flask_login import current_user, login_required, login_user
 from flask_wtf import FlaskForm
 from sqlalchemy import select
 from wtforms import PasswordField, StringField
@@ -47,7 +47,13 @@ def edit():
             password.current.errors.append("That is not your current password.")
         else:
             current_user.set_password(password.password.data)
+            # Every other device is signed out; this one signs in again.
+            current_user.session_version += 1
             db.session.commit()
+            login_user(current_user)
+            from ..sessions import start_session
+
+            start_session()
             flash("Password changed.", "success")
             return redirect(url_for(".edit"))
     links = [link for link in _links() if link.can_view] if current_user.is_parent else []
@@ -63,3 +69,12 @@ def summaries():
     db.session.commit()
     flash("Email choices saved.", "success")
     return redirect(url_for(".edit"))
+
+
+@bp.post("/sign-out-everywhere")
+@login_required
+def sign_out_everywhere():
+    current_user.session_version += 1
+    db.session.commit()
+    flash("You are signed out on every device.", "info")
+    return redirect(url_for("auth.login"))

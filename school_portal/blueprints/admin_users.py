@@ -106,3 +106,13 @@ def resend_invite(user_id: int):
     db.session.commit()
     flash(f"Invitation sent to {user.email}.", "success")
     return redirect(url_for(".edit", user_id=user.id))
+
+
+@bp.post("/<int:user_id>/sign-out")
+@admin_required
+def sign_out_everywhere(user_id: int):
+    user = db.get_or_404(User, user_id)
+    user.session_version += 1
+    db.session.commit()
+    flash(f"{user.name} is signed out on every device.", "success")
+    return redirect(url_for(".edit", user_id=user.id))

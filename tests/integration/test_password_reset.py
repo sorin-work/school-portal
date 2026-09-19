@@ -1,5 +1,6 @@
 import re
 
+from school_portal.extensions import db
 from school_portal.models import Role
 
 from ..conftest import login, make_user
@@ -66,3 +67,15 @@ def test_a_reset_cancels_the_other_links(client, app):
     client.post(second, data={"password": "the new password", "confirm": "the new password"})
     response = client.get(first)
     assert response.status_code == 302
+
+
+def test_a_reset_signs_out_other_sessions(client, app):
+    user = make_user(Role.PARENT, email="sam@example.com")
+    other = app.test_client()
+    login(other, user)
+    assert other.get("/").status_code == 200
+    client.post("/forgot", data={"email": "sam@example.com"})
+    link = reset_link(sent(app)[0])
+    client.post(link, data={"password": "the new password", "confirm": "the new password"})
+    db.session.refresh(user)
+    assert other.get("/").status_code == 302
