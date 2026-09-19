@@ -26,6 +26,7 @@ class User(UserMixin, db.Model):
     phone: Mapped[str | None] = mapped_column(String(40))
     password_hash: Mapped[str | None] = mapped_column(String(255))
     active: Mapped[bool] = mapped_column(default=True)
+    session_version: Mapped[int] = mapped_column(default=1, server_default="1")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
@@ -39,6 +40,11 @@ class User(UserMixin, db.Model):
         if not self.password_hash:
             return False
         return check_password_hash(self.password_hash, password)
+
+    def get_id(self) -> str:
+        # The version is part of the id kept in the session cookie, so raising
+        # it signs the user out everywhere.
+        return f"{self.id}:{self.session_version}"
 
     @property
     def is_active(self) -> bool:
