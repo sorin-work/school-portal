@@ -57,6 +57,10 @@ PostgreSQL for everything, including the small job queue the worker runs.
   what families may see from the day. Each carer can turn it off per child.
 - **Audit log** of who viewed a child's profile or diary and who changed the
   record, links or access.
+- **Security.** Rate limits on sign-in, password reset by email, sessions
+  that end after a set time and after inactivity, sign out everywhere,
+  CSRF on every form and htmx request, a strict Content-Security-Policy, and
+  every query scoped to the user's children or rooms.
 
 ## Quick start
 

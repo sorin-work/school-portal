@@ -42,6 +42,9 @@ def create_app(overrides: dict | None = None) -> Flask:
     from .sessions import init_sessions
 
     init_sessions(app)
+    from .security_headers import init_security_headers
+
+    init_security_headers(app)
     return app
 
 
