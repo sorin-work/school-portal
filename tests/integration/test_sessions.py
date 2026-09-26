@@ -25,6 +25,17 @@ def test_the_idle_limit_is_a_setting(client, app):
     assert client.get("/").status_code == 200
 
 
+def test_polling_for_notifications_does_not_keep_a_session_alive(client, app):
+    user = make_user(Role.STAFF)
+    login(client, user)
+    with client.session_transaction() as session:
+        session["seen"] -= 30 * 60
+        before = session["seen"]
+    client.get("/notifications/count")
+    with client.session_transaction() as session:
+        assert session["seen"] == before
+
+
 def test_sign_out_everywhere(client, app):
     user = make_user(Role.PARENT)
     other = app.test_client()

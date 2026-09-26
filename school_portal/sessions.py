@@ -11,6 +11,8 @@ from flask_login import current_user, logout_user
 from . import settings, timeutil
 
 SKIP = {"static", "health.healthz"}
+# Requests the page makes on its own; they must not count as activity.
+PASSIVE = {"notifications.count"}
 
 
 def start_session() -> None:
@@ -33,5 +35,6 @@ def init_sessions(app: Flask) -> None:
             if request.headers.get("HX-Request"):
                 return "", 204, {"HX-Redirect": url_for("auth.login")}
             return redirect(url_for("auth.login", next=request.full_path.rstrip("?")))
-        session["seen"] = now
+        if request.endpoint not in PASSIVE:
+            session["seen"] = now
         return None
