@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Retention · {{ school_name }}{% endblock %}
+{% block content %}
+<h1 class="page-title">Children who have left</h1>
+<p class="mb-4 max-w-3xl text-sm text-stone-600">Records are deleted on the date shown by the nightly job. A record on hold is kept until the hold is released.</p>
+<div class="card overflow-x-auto">
+  <table class="table">
+    <thead><tr><th>Child</th><th>Left</th><th>Deleted on</th><th></th></tr></thead>
+    <tbody>
+      {% for child in children %}
+      <tr>
+        <td><a class="link" href="{{ url_for('admin_children.edit', child_id=child.id) }}">{{ child.display_name }}</a></td>
+        <td>{{ child.left_on|date }}</td>
+        <td>{{ child.purge_after|date }}{% if child.retention_hold %} <span class="badge badge-amber">On hold</span>{% endif %}</td>
+        <td class="flex flex-wrap gap-2">
+          <form method="post" action="{{ url_for('admin_retention.toggle_hold', child_id=child.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-secondary" type="submit">{{ "Release hold" if child.retention_hold else "Hold" }}</button>
+          </form>
+          {% if not child.retention_hold %}
+          <form method="post" action="{{ url_for('admin_retention.delete_now', child_id=child.id) }}" data-confirm="Delete everything about {{ child.display_name }} now? This cannot be undone.">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-danger" type="submit">Delete now</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="text-stone-600">Nobody has left.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

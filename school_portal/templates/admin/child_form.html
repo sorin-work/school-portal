@@ -11,6 +11,9 @@
   </div>
   {% endif %}
 </div>
+{% if child and child.has_left %}
+<div class="flash flash-info">Left on {{ child.left_on|date }}. The record will be deleted on {{ child.purge_after|date }}{% if child.retention_hold %}, but it is on hold{% endif %}.</div>
+{% endif %}
 <form method="post" class="card grid gap-4 sm:grid-cols-2" novalidate>
   {{ form.hidden_tag() }}
   {{ field(form.first_name) }}
@@ -63,6 +66,20 @@
     {{ field(guardian_form.restriction_reason, class="sm:col-span-2", hint="Required for timeline only or no access, for example the court order's reference.") }}
     <div class="sm:col-span-2"><button class="btn btn-secondary" type="submit">Link a parent or carer</button></div>
   </form>
+</section>
+{% endif %}
+{% if child %}
+<section class="card mt-6">
+  <h2 class="section-title">Leaving</h2>
+  {% if child.has_left %}
+  <p class="text-sm text-stone-600">Marked as left.</p>
+  {% else %}
+  <form method="post" action="{{ url_for('admin_children.leave', child_id=child.id) }}" class="flex flex-wrap items-end gap-3" data-confirm="Mark {{ child.display_name }} as left? The record will be deleted after the retention period.">
+    {{ leave_form.hidden_tag() }}
+    {{ field(leave_form.left_on) }}
+    <button class="btn btn-danger" type="submit">Mark as left</button>
+  </form>
+  {% endif %}
 </section>
 {% endif %}
 {% endblock %}

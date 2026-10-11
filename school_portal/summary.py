@@ -28,6 +28,7 @@ def build_summaries(day: date) -> dict[int, list[tuple[Child, list]]]:
             Guardian.receives_summary,
             User.active,
             User.password_hash.is_not(None),
+            Child.left_on.is_(None),
         )
     ).all()
     children = {child.id: child for _, child, _ in links}

@@ -36,6 +36,7 @@ def load_handlers() -> None:
     """Import the modules that register handlers."""
     from . import (
         mail,  # noqa: F401
+        retention,  # noqa: F401
         summary,  # noqa: F401
     )
 
@@ -129,6 +130,9 @@ def housekeeping(payload: dict) -> None:
     from . import ratelimit
 
     ratelimit.prune()
+    from . import retention
+
+    retention.purge_due()
 
 
 def work_forever(poll_seconds: float = 5.0) -> None:  # pragma: no cover - runs in the worker

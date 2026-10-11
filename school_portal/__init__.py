@@ -103,6 +103,9 @@ def _register_blueprints(app: Flask) -> None:
     from .blueprints import admin_audit
 
     app.register_blueprint(admin_audit.bp)
+    from .blueprints import admin_retention
+
+    app.register_blueprint(admin_retention.bp)
 
 
 def _register_error_pages(app: Flask) -> None:

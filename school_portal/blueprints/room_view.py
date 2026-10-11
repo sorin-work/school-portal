@@ -28,12 +28,15 @@ def room_or_404(room_id: int) -> Room:
 
 def room_children(room: Room) -> list[Child]:
     query = select(Child).where(Child.room_id == room.id).order_by(Child.first_name)
+    query = query.where(Child.left_on.is_(None))
     return list(db.session.scalars(query))
 
 
 def child_in_room(room: Room, child_id: int) -> Child:
     child = db.session.get(Child, child_id)
     if child is None or child.room_id != room.id:
+        abort(404)
+    if child.left_on is not None:
         abort(404)
     return child
 

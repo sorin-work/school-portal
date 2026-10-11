@@ -49,6 +49,8 @@ def rooms_for(user: User) -> list[Room]:
 def children_query(user: User, *, include_left: bool = False) -> Select:
     """A select of the children this user may see, ordered by name."""
     query = select(Child).order_by(Child.first_name, Child.last_name)
+    if not include_left:
+        query = query.where(Child.left_on.is_(None))
     if user.is_admin:
         return query
     if user.is_staff:

@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from flask import Blueprint, abort, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user
 from flask_wtf import FlaskForm
@@ -5,7 +7,7 @@ from sqlalchemy import func, or_, select
 from wtforms import BooleanField, DateField, EmailField, SelectField, StringField, TextAreaField
 from wtforms.validators import DataRequired, Email, Length, Optional
 
-from .. import audit, timeutil, tokens
+from .. import audit, settings, timeutil, tokens
 from ..decorators import admin_required
 from ..extensions import db
 from ..mail import queue_email
@@ -47,6 +49,10 @@ class AccessForm(FlaskForm):
     receives_summary = BooleanField("Daily summary email")
 
 
+class LeaveForm(FlaskForm):
+    left_on = DateField("Last day", validators=[DataRequired()])
+
+
 @bp.get("/")
 @admin_required
 def index():
@@ -64,7 +70,8 @@ def index():
                 func.lower(Child.preferred_name).like(like),
             )
         )
-    show_left = False
+    show_left = request.args.get("left") == "1"
+    query = query.where(Child.left_on.is_not(None) if show_left else Child.left_on.is_(None))
     rooms = list(db.session.scalars(select(Room).order_by(Room.sort_order, Room.name)))
     return render_template(
         "admin/children.html",
@@ -152,6 +159,7 @@ def edit(child_id: int):
         form=form,
         child=child,
         guardian_form=GuardianForm(prefix="g"),
+        leave_form=LeaveForm(prefix="l", left_on=child.left_on or timeutil.today()),
     )
 
 
@@ -272,3 +280,22 @@ def remove_guardian(child_id: int, guardian_id: int):
     db.session.commit()
     flash("Guardian removed from this child.", "success")
     return redirect(url_for(".edit", child_id=child_id) + "#guardians")
+
+
+@bp.post("/<int:child_id>/leave")
+@admin_required
+def leave(child_id: int):
+    child = db.get_or_404(Child, child_id)
+    form = LeaveForm(prefix="l")
+    if form.validate_on_submit():
+        child.left_on = form.left_on.data
+        child.purge_after = form.left_on.data + timedelta(days=settings.get_int("retention_days"))
+        child.room_id = None
+        audit.record("child.left", child, left_on=child.left_on.isoformat())
+        db.session.commit()
+        flash(
+            f"{child.display_name} has left. The record will be deleted on "
+            f"{timeutil.fmt_date(child.purge_after)}.",
+            "success",
+        )
+    return redirect(url_for(".edit", child_id=child.id))

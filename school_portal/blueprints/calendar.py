@@ -94,6 +94,7 @@ def event_or_404(event_id: int) -> SchoolEvent:
 
 def audience_children(event: SchoolEvent) -> list[Child]:
     query = select(Child).order_by(Child.first_name)
+    query = query.where(Child.left_on.is_(None))
     if event.rooms:
         query = query.where(Child.room_id.in_([r.id for r in event.rooms]))
     return list(db.session.scalars(query))
