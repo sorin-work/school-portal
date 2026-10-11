@@ -33,6 +33,9 @@ class Child(db.Model):
     medical_notes: Mapped[str | None] = mapped_column(Text)
     share_medical_with_parents: Mapped[bool] = mapped_column(default=False)
     photo_consent: Mapped[str] = mapped_column(String(8), default="none", server_default="none")
+    left_on: Mapped[date | None] = mapped_column(Date)
+    purge_after: Mapped[date | None] = mapped_column(Date)
+    retention_hold: Mapped[bool] = mapped_column(default=False, server_default="false")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
@@ -59,6 +62,10 @@ class Child(db.Model):
     @property
     def has_allergies(self) -> bool:
         return bool(self.allergies and self.allergies.strip())
+
+    @property
+    def has_left(self) -> bool:
+        return self.left_on is not None
 
     def age_on(self, day: date) -> str:
         months = (day.year - self.date_of_birth.year) * 12 + day.month - self.date_of_birth.month
