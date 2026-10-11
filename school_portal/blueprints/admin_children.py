@@ -299,3 +299,15 @@ def leave(child_id: int):
             "success",
         )
     return redirect(url_for(".edit", child_id=child.id))
+
+
+@bp.post("/<int:child_id>/return")
+@admin_required
+def undo_leave(child_id: int):
+    child = db.get_or_404(Child, child_id)
+    child.left_on = None
+    child.purge_after = None
+    audit.record("child.returned", child)
+    db.session.commit()
+    flash(f"{child.display_name} is back on the roll. Choose a room for them.", "success")
+    return redirect(url_for(".edit", child_id=child.id))
