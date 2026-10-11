@@ -54,3 +54,10 @@ def register_cli(app: Flask) -> None:
 
         schedule()
         click.echo(f"Ran {run_due(limit=500)} jobs.")
+
+    @app.cli.command("purge-leavers")
+    def purge_leavers() -> None:
+        """Delete the records of children whose retention period is over."""
+        from .retention import purge_due
+
+        click.echo(f"Deleted {purge_due()} records.")
