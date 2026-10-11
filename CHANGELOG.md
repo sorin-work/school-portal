@@ -2,6 +2,25 @@
 
 All notable changes, newest first. Dates are when the version was tagged.
 
+## 0.8.0 (2026-10-11)
+
+### Retention
+
+- Children can be marked as left; their record is deleted after the
+  retention period by the nightly job, unless it is on hold
+- Group photos stay for the other children; audit entries keep the time and
+  the action but lose their details
+- Leavers page for administrators, with hold and delete now
+
+### Security
+
+- Rate limit on sign-in per address and per client
+- Sessions end after a fixed time and after a period without activity
+- Sign out everywhere, for yourself and by an administrator; a password
+  change or reset signs out other devices
+- Content-Security-Policy and other security headers on every response
+- Notification polling no longer keeps an idle session alive
+
 ## 0.7.0 (2026-09-05)
 
 - Audit log of who viewed a child's profile or diary and who changed the
