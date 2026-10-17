@@ -61,6 +61,17 @@ def test_another_day(client, school):
     assert b"Walk to the park" in page.data
 
 
+def test_a_day_starts_at_midnight_school_time(client, school):
+    from datetime import date
+
+    # 00:30 on 2 July in London is 23:30 UTC on 1 July.
+    day = date(2025, 7, 2)
+    add_event(school.ava, details={"title": "Early note"}, when=timeutil.at(day, time(0, 30)))
+    login(client, school.sam)
+    assert b"Early note" in client.get(f"/children/{school.ava.id}/diary?day=2025-07-02").data
+    assert b"Early note" not in client.get(f"/children/{school.ava.id}/diary?day=2025-07-01").data
+
+
 def test_parent_acknowledges_an_accident(client, school):
     report = add_event(
         school.ava,

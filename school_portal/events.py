@@ -6,6 +6,7 @@ from datetime import date, datetime
 from flask_login import current_user
 from sqlalchemy import select
 
+from . import timeutil
 from .extensions import db
 from .models import Absence, Attendance, Child, Event, Room
 
@@ -65,10 +66,7 @@ class ChildDay:
 
 
 def day_events(child_ids: list[int], day: date) -> list[Event]:
-    from datetime import UTC, time, timedelta
-
-    start = datetime.combine(day, time(0, 0), tzinfo=UTC)
-    end = start + timedelta(days=1)
+    start, end = timeutil.day_bounds(day)
     return list(
         db.session.scalars(
             select(Event)
