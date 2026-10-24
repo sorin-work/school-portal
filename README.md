@@ -57,6 +57,9 @@ PostgreSQL for everything, including the small job queue the worker runs.
   what families may see from the day. Each carer can turn it off per child.
 - **Audit log** of who viewed a child's profile or diary and who changed the
   record, links or access.
+- **Subject access export**: an administrator downloads a zip with a child's
+  whole record (JSON and a readable HTML page, plus the photos the family may
+  have).
 - **Retention.** A child marked as left is deleted with everything about them
   after a set period (three years by default), unless the record is on hold.
   Group photos stay for the other children.

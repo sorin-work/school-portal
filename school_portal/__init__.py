@@ -103,6 +103,9 @@ def _register_blueprints(app: Flask) -> None:
     from .blueprints import admin_audit
 
     app.register_blueprint(admin_audit.bp)
+    from .blueprints import exports
+
+    app.register_blueprint(exports.bp)
     from .blueprints import admin_retention
 
     app.register_blueprint(admin_retention.bp)

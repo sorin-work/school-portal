@@ -8,6 +8,7 @@
   <div class="flex flex-wrap gap-2">
     <a class="btn btn-secondary" href="{{ url_for('children.show', child_id=child.id) }}">Profile</a>
     <a class="btn btn-secondary" href="{{ url_for('admin_audit.index', child=child.id) }}">Audit log</a>
+    <a class="btn btn-secondary" href="{{ url_for('exports.form', child_id=child.id) }}">Export record</a>
   </div>
   {% endif %}
 </div>

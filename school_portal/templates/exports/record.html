@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en-GB">
+<head><meta charset="utf-8"><title>Record of {{ record.child.first_name }} {{ record.child.last_name }}</title>
+<style>body{font-family:sans-serif;max-width:60rem;margin:2rem auto;padding:0 1rem}table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid #ddd;padding:.3rem;text-align:left;vertical-align:top}img{max-width:12rem}</style>
+</head>
+<body>
+<h1>{{ record.child.first_name }} {{ record.child.last_name }}</h1>
+<p>Generated {{ record.generated_at }}{% if record.requested_by %} for {{ record.requested_by }}{% endif %}.</p>
+<h2>Details</h2>
+<table>{% for key, value in record.child.items() %}<tr><th>{{ key.replace("_", " ") }}</th><td>{{ value if value is not none else "" }}</td></tr>{% endfor %}</table>
+<h2>Parents and carers</h2>
+<ul>{% for g in record.guardians %}<li>{{ g.name }}, {{ g.relationship }}</li>{% endfor %}</ul>
+<h2>Diary</h2>
+<table>
+<tr><th>When</th><th>What</th><th>Note</th><th>Photos</th></tr>
+{% for e in record.events %}
+<tr><td>{{ e.occurred_at }}</td><td>{{ e.summary }}{% if e.visibility == "staff" %} (staff only){% endif %}{% if e.removed_at %} (removed {{ e.removed_at }}){% endif %}</td><td>{{ e.note or "" }}</td>
+<td>{% for media_id in e.photos %}{% if media_id in photos %}<img src="{{ photos[media_id] }}" alt="">{% endif %}{% endfor %}</td></tr>
+{% endfor %}
+</table>
+{% if record.photos_withheld %}<p>{{ record.photos_withheld }} photos were left out because other children in them may not be shown to other families.</p>{% endif %}
+<h2>Attendance</h2>
+<table><tr><th>Day</th><th>In</th><th>Out</th><th>Collected by</th></tr>{% for a in record.attendance %}<tr><td>{{ a.day }}</td><td>{{ a["in"] }}</td><td>{{ a.out or "" }}</td><td>{{ a.collected_by or "" }}</td></tr>{% endfor %}</table>
+<h2>Absences</h2>
+<ul>{% for a in record.absences %}<li>{{ a["from"] }} to {{ a.until }}: {{ a.reason }}{% if a.cancelled %} (cancelled){% endif %}</li>{% endfor %}</ul>
+<h2>Messages</h2>
+<table>{% for m in record.messages %}<tr><td>{{ m.at }}</td><td>{{ m["from"] or "" }}</td><td>{{ m.body }}</td></tr>{% endfor %}</table>
+<h2>Event replies</h2>
+<ul>{% for r in record.event_replies %}<li>{{ r.event }}: {{ "coming" if r.attending else "not coming" }}{% if r.consent_given %}, consent signed by {{ r.signed_name }}{% endif %}</li>{% endfor %}</ul>
+</body>
+</html>

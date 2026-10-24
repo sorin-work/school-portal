@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Export · {{ child.display_name }}{% endblock %}
+{% block content %}
+<h1 class="page-title">Export the record of {{ child.display_name }}</h1>
+<div class="card max-w-2xl space-y-3 text-sm">
+  <p>The zip holds everything the portal keeps about {{ child.display_name }}: details, diary entries (staff-only and removed ones too, marked as such), attendance, absences, messages, event replies and photos.</p>
+  <p>Photos are included only where the photo consent of every other child in them allows the family to see them. Read the export before passing it on; it may still hold information about other people that should be redacted.</p>
+  <form method="post" class="space-y-3">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label class="label" for="guardian_id">Requested by</label>
+    <select class="input" id="guardian_id" name="guardian_id">
+      {% for link in child.guardians %}<option value="{{ link.id }}">{{ link.user.name }} ({{ link.relationship_label }})</option>{% endfor %}
+      <option value="">Someone else</option>
+    </select>
+    <button class="btn btn-primary" type="submit">Download the zip</button>
+  </form>
+</div>
+{% endblock %}
