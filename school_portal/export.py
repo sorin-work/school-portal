@@ -13,7 +13,7 @@ import zipfile
 from flask import render_template
 from sqlalchemy import select
 
-from . import timeutil, uploads
+from . import photos, timeutil, uploads
 from .extensions import db
 from .models import (
     Absence,
@@ -132,7 +132,10 @@ def shareable_media(child: Child) -> tuple[list, int]:
             if link.media_id in seen:
                 continue
             seen.add(link.media_id)
-            shown.append(link.media)
+            if photos.visible_to_family_of(child, photos.children_in(link.media_id)):
+                shown.append(link.media)
+            else:
+                withheld += 1
     return shown, withheld
 
 
