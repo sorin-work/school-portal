@@ -50,6 +50,11 @@ def test_no_access_guardians_get_nothing(school):
     assert build_summaries(timeutil.today()) == {}
 
 
+def test_staff_only_events_are_left_out(school):
+    add(school.ava, visibility="staff", title="Staff concern")
+    assert build_summaries(timeutil.today()) == {}
+
+
 def test_the_job_sends_the_emails(app, school):
     add(school.ava, title="Water play")
     jobs.load_handlers()

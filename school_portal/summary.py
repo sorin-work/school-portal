@@ -34,6 +34,8 @@ def build_summaries(day: date) -> dict[int, list[tuple[Child, list]]]:
     children = {child.id: child for _, child, _ in links}
     events_by_child = defaultdict(list)
     for event in day_events(list(children), day) if children else []:
+        if event.visibility != "parents":
+            continue
         events_by_child[event.child_id].append(event)
     result: dict[int, list] = defaultdict(list)
     for _, child, user in links:
