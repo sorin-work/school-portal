@@ -10,6 +10,7 @@ import io
 import json
 import zipfile
 
+from flask import render_template
 from sqlalchemy import select
 
 from . import timeutil, uploads
@@ -153,4 +154,7 @@ def build_zip(child: Child, requested_by: Guardian | None) -> bytes:
                 names[item.id] = name
             except FileNotFoundError:
                 continue
+        archive.writestr(
+            "index.html", render_template("exports/record.html", record=record, photos=names)
+        )
     return buffer.getvalue()

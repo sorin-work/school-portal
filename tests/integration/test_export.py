@@ -22,6 +22,7 @@ def test_export_holds_the_record(client, school):
     assert record["child"]["medical_notes"] == "Inhaler"
     assert record["messages"][0]["body"] == "Hello from home"
     assert record["requested_by"] == "Sam Reid"
+    assert "index.html" in archive.namelist()
 
 
 def test_only_administrators_export(client, school):
