@@ -1,6 +1,6 @@
 [project]
 name = "school-portal"
-version = "0.8.0"
+version = "0.9.0"
 description = "Daily diary, attendance and messages for a nursery or primary school"
 requires-python = ">=3.13"
 license = { text = "MIT" }

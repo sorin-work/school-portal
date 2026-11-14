@@ -2,6 +2,22 @@
 
 All notable changes, newest first. Dates are when the version was tagged.
 
+## 0.9.0 (2026-11-14)
+
+### Privacy
+
+- Subject access export: a zip with a child's whole record, a readable HTML
+  page and the photos the family may have
+- The export leaves out photos where another child's consent does not allow
+  them, and says how many
+- Documentation on safeguarding and privacy, including what the portal does
+  not do
+
+### Fixes
+
+- A day in the diary starts at midnight school time, not UTC
+- The daily summary no longer includes staff-only entries
+
 ## 0.8.0 (2026-10-11)
 
 ### Retention
