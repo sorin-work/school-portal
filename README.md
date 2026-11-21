@@ -187,6 +187,30 @@ route that takes a child id with a child the user may not see.
 CI (`.github/workflows/ci.yml`) runs lint, the format check, the tests, the
 stylesheet build and a Docker build.
 
+## Layout
+
+```
+school_portal/
+  __init__.py        app factory, blueprints, template filters
+  access.py          who may see which child (every query goes through it)
+  blueprints/        one module per area: auth, room_view, timeline, ...
+  models/            SQLAlchemy models, one module per area
+  events.py          logging events and reading a child's day
+  photos.py          the photo consent rule
+  uploads.py         image checks, EXIF stripping, storage
+  jobs.py            the database job queue and the worker loop
+  templates/         Jinja templates, htmx partials start with _
+migrations/          Alembic migrations
+tests/               unit and integration tests
+docs/                architecture, data model, permissions, privacy, operations
+docker/              entrypoint for the image
+```
+
+More in [docs/](docs/): [architecture](docs/architecture.md),
+[data model](docs/data-model.md), [permissions](docs/permissions.md),
+[safeguarding and privacy](docs/safeguarding-and-privacy.md) and
+[operations](docs/operations.md). What changed when is in the
+[changelog](CHANGELOG.md).
 
 ## Licence
 
