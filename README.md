@@ -211,6 +211,7 @@ More in [docs/](docs/): [architecture](docs/architecture.md),
 [safeguarding and privacy](docs/safeguarding-and-privacy.md) and
 [operations](docs/operations.md). What changed when is in the
 [changelog](CHANGELOG.md).
+What I might build next is in the [roadmap](ROADMAP.md).
 
 ## Licence
 
