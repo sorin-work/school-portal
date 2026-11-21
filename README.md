@@ -167,6 +167,25 @@ An administrator for a fresh database: `flask --app school_portal create-admin`.
 A new migration: change the models, then
 `alembic revision --autogenerate -m "what changed"` and read what it wrote.
 
+## Testing
+
+```sh
+docker compose up -d db
+docker compose exec db createdb -U school school_test   # once
+pytest
+ruff check . && ruff format --check .
+```
+
+The tests need PostgreSQL (`TEST_DATABASE_URL`, by default the `school_test`
+database on port 5463). The schema is built with the migrations at the start
+of a run, and a test checks that the migrations and the models agree.
+`tests/unit` has the pure code (time zones, the photo consent rule, image
+cleaning); `tests/integration` drives the app through Flask's test client.
+`tests/integration/test_scoping.py` is the one to read first: it tries every
+route that takes a child id with a child the user may not see.
+
+CI (`.github/workflows/ci.yml`) runs lint, the format check, the tests, the
+stylesheet build and a Docker build.
 
 
 ## Licence
